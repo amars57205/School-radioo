@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</title>
+    
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https: http: data: blob:; img-src * 'self' data: blob: https: http: https://*.googleusercontent.com https://drive.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; media-src * 'self' https: http: blob:; connect-src * 'self' https: wss:;">
+
+    <!-- خطوط جوجل المدرسية -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Changa:wght@500;700&display=swap" rel="stylesheet">
+    <!-- أيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- مكتبة Supabase للتحديثات اللحظية للسحابة -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --school-navy: #1B365D;    
+            --school-green: #2E7D32;   
+            --school-gold: #F59E0B;    
+            --bg-light: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --danger-color: #EF4444;
+            --radius: 16px;
+            --shadow: 0 10px 25px -5px rgba(27, 54, 93, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--school-navy), #0F213D);
+            color: white;
+            padding: clamp(1.2rem, 3.5vw, 2rem) clamp(1rem, 4vw, 2rem);
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-bottom: 4px solid var(--school-gold);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .developer-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--school-gold);
+            border: 1px solid var(--school-gold);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            font-family: 'Changa', sans-serif;
+            font-size: clamp(1.3rem, 3.8vw, 2.2rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 12px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .logo i { color: var(--school-gold); }
+
+        .school-subtitle {
+            font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+            color: #E2E8F0;
+            margin-top: 8px;
+            font-weight: 400;
+            text-align: center;
+            width: 100%;
+        }
+
+        .ticker-wrapper {
+            background: var(--card-bg);
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            height: 48px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .ticker-label {
+            background: var(--school-green);
+            color: white;
+            font-weight: 700;
+            padding: 0 clamp(10px, 3vw, 25px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            white-space: nowrap;
+        }
+
+        .ticker-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-track {
+            white-space: nowrap;
+            display: inline-block;
+            animation: ticker 35s linear infinite;
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin-left: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--school-navy);
+        }
+
+        .ticker-item::after {
+            content: "🎓";
+            margin-right: 40px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .main-container {
+            max-width: 1100px;
+            margin: clamp(1rem, 4vw, 2.5rem) auto;
+            padding: 0 clamp(10px, 3vw, 20px);
+            flex: 1;
+            width: 100%;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .horizontal-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            border: 1px solid #EDF2F7;
+            position: relative;
+        }
+
+        .horizontal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(27, 54, 93, 0.12);
+            border-color: var(--school-gold);
+        }
+
+        .card-img-wrap {
+            width: 35%;
+            min-width: 250px;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            background-color: #e2e8f0;
+        }
+
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .horizontal-card:hover .card-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .card-category {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(27, 54, 93, 0.85);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-content {
+            width: 65%;
+            padding: clamp(15px, 3vw, 24px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--school-navy);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            word-break: break-word;
+        }
+
+        .card-title:hover { color: var(--school-green); }
+
+        .card-excerpt {
+            color: var(--text-muted);
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            word-break: break-word;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed #E2E8F0;
+            padding-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .read-more-btn {
+            color: var(--school-green);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: gap 0.2s ease;
+        }
+
+        .read-more-btn:hover { gap: 8px; }
+
+        .article-page {
+            display: none;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 5vw, 40px);
+        }
+
+        .back-btn {
+            background: var(--bg-light);
+            color: var(--school-navy);
+            border: 1px solid #CBD5E1;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: var(--school-navy);
+            color: white;
+            border-color: var(--school-navy);
+        }
+
+        .article-title {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: var(--school-navy);
+            margin-bottom: 15px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .article-meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .article-img {
+            width: 100%;
+            max-height: 480px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            background-color: #e2e8f0;
+        }
+
+        .article-text {
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            line-height: 2;
+            color: #334155;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+
+        footer {
+            background: var(--school-navy);
+            color: white;
+            margin-top: auto;
+            border-top: 5px solid var(--school-gold);
+        }
+
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            text-align: right;
+        }
+
+        .rights-text {
+            font-size: 0.95rem;
+            color: #E2E8F0;
+            font-weight: 600;
+        }
+
+        .admin-trigger-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-trigger-btn:hover {
+            background: var(--school-gold);
+            color: var(--school-navy);
+            border-color: var(--school-gold);
+        }
+
+        .admin-section {
+            display: none;
+            background: white;
+            color: var(--text-dark);
+            padding: clamp(20px, 4vw, 35px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin: 20px auto 40px auto;
+            max-width: 800px;
+        }
+
+        .btn-action-panel {
+            background: #F1F5F9;
+            color: var(--school-navy);
+            border: 1px solid #CBD5E1;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .btn-action-panel:hover {
+            background: var(--school-gold);
+            color: var(--school-navy);
+            border-color: var(--school-gold);
+        }
+
+        .btn-delete-all {
+            background: #FEE2E2;
+            color: var(--danger-color);
+            border: 1px solid #FCA5A5;
+        }
+
+        .btn-delete-all:hover {
+            background: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        .admin-news-list {
+            margin-top: 30px;
+            border-top: 2px dashed #E2E8F0;
+            padding-top: 20px;
+        }
+
+        .admin-news-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .admin-news-item span {
+            font-weight: 700;
+            color: var(--school-navy);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .btn-delete-single {
+            background: #FEE2E2;
+            color: var(--danger-color);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-delete-single:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: var(--school-navy);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--school-green);
+            outline: none;
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background: var(--school-green);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover { background: #216325; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            padding: clamp(25px, 5vw, 35px);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px; right: 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #94A3B8;
+        }
+
+        @media (max-width: 768px) {
+            .horizontal-card { flex-direction: column; }
+            .card-img-wrap { width: 100%; height: 200px; }
+            .card-content { width: 100%; }
+            .footer-content { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="developer-badge">
+            <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
+        </div>
+        <div class="logo">
+            <i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية
+        </div>
+        <div class="school-subtitle">النافذة الإخبارية والأنشطة المدرسية الرسمية</div>
+    </header>
+
+    <div class="ticker-wrapper">
+        <div class="ticker-label"><i class="fa-solid fa-bullhorn"></i> أخبار الإذاعة المدرسية</div>
+        <div class="ticker-content">
+            <div class="ticker-track" id="ticker-track"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        
+        <div id="home-view">
+            <div class="news-list" id="news-list"></div>
+        </div>
+
+        <div id="article-view" class="article-page">
+            <button class="back-btn" onclick="showHome()">
+                <i class="fa-solid fa-arrow-right"></i> العودة للرئيسية
+            </button>
+            <h1 id="art-title" class="article-title" style="margin-top: 20px;"></h1>
+            <div class="article-meta">
+                <span><i class="fa-regular fa-calendar"></i> <span id="art-date"></span></span>
+                <span><i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية</span>
+            </div>
+            <img id="art-img" class="article-img" src="" alt="صورة الخبر" referrerpolicy="no-referrer">
+            <div id="art-content" class="article-text"></div>
+        </div>
+
+        <div id="admin-view" class="admin-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 10px; flex-wrap: wrap;">
+                <h2 style="color: var(--school-navy); font-size: 1.3rem;"><i class="fa-solid fa-sliders"></i> لوحة إدارة الأخبار الإذاعية</h2>
+                
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-action-panel" onclick="scrollToNewsForm()">
+                        <i class="fa-solid fa-plus-circle"></i> إضافة خبر جديد
+                    </button>
+                    <button class="btn-action-panel btn-delete-all" onclick="clearAllNews()">
+                        <i class="fa-solid fa-trash-can"></i> حذف الأخبار السابقة
+                    </button>
+                    <button class="btn-action-panel" onclick="openChangePassModal()">
+                        <i class="fa-solid fa-key"></i> تغيير الرقم السري
+                    </button>
+                    <button class="back-btn" style="margin-bottom:0;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
+                </div>
+            </div>
+            
+            <form id="news-form" onsubmit="publishNews(event)">
+                <div class="form-group">
+                    <label class="form-label">عنوان الفعالية / الخبر:</label>
+                    <input type="text" id="inp-title" class="form-control" maxlength="150" required placeholder="مثال: تكريم الطلاب المتفوقين في الأنشطة...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">رابط صورة الخبر (يقبل رابط Google Drive المباشر أو أي رابط صورة):</label>
+                    <input type="url" id="inp-img" class="form-control" required placeholder="مثال: https://drive.google.com/file/d/XXXX/view?usp=sharing">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">التفاصيل والتقرير الإخباري الكامل:</label>
+                    <textarea id="inp-content" class="form-control" maxlength="5000" required placeholder="اكتب التفاصيل الكاملة للخبر المدرسي هنا..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-paper-plane"></i> إضافة خبر جديد ونشره فوراً
+                </button>
+            </form>
+
+            <div class="admin-news-list">
+                <h3 style="font-size: 1.1rem; color: var(--school-navy); margin-bottom: 15px;">
+                    <i class="fa-solid fa-list-check"></i> التحكم بالأخبار المنشورة حالياً:
+                </h3>
+                <div id="admin-items-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="login-modal">
+        <div class="login-card">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeLoginModal()"></i>
+            <h3 style="margin-bottom: 15px; color: var(--school-navy);"><i class="fa-solid fa-lock"></i> دخول إدارة الإذاعة المدرسية</h3>
+            <p style="font-size:0.85rem; color:#64748B; margin-bottom:20px;">أدخل الرقم السري للوصول للوحة التحكم</p>
+            <div class="form-group">
+                <input type="password" id="admin-pass" class="form-control" placeholder="أدخل الرقم السري..." onkeypress="handleEnter(event)">
+            </div>
+            <button class="btn-submit" onclick="verifyAdmin()">تسجيل الدخول</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="change-pass-modal">
+        <div class="login-card">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeChangePassModal()"></i>
+            <h3 style="margin-bottom: 15px; color: var(--school-navy);"><i class="fa-solid fa-key"></i> تغيير الرقم السري</h3>
+            <div class="form-group" style="text-align: right;">
+                <label class="form-label" style="font-size: 0.85rem;">الرقم السري الحالي:</label>
+                <input type="password" id="curr-pass" class="form-control" placeholder="الرقم السري الحالي">
+            </div>
+            <div class="form-group" style="text-align: right;">
+                <label class="form-label" style="font-size: 0.85rem;">الرقم السري الجديد:</label>
+                <input type="password" id="new-pass" class="form-control" placeholder="الرقم السري الجديد">
+            </div>
+            <button class="btn-submit" onclick="saveNewPassword()">حفظ الرقم السري الجديد</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div>
+                <p style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</p>
+                <p class="rights-text">جميع الحقوق محفوظة © مدرسة عمار بن ياسر الابتدائية</p>
+            </div>
+            <button class="admin-trigger-btn" onclick="openLoginModal()">
+                <i class="fa-solid fa-user-gear"></i> لوحة التحكم والمسؤول
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1v7oSksXu9v0q_HBowNCES2paP8GzMftB';
+
+        const SUPABASE_URL = 'https://YOUR-PROJECT-ID.supabase.co';
+        const SUPABASE_KEY = 'YOUR-ANON-KEY';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let cachedNews = [];
+
+        function getStoredPassword() {
+            return localStorage.getItem('school_admin_pass') || '1234';
+        }
+
+        function setStoredPassword(newPass) {
+            localStorage.setItem('school_admin_pass', newPass);
+        }
+
+        function sanitizeText(str) {
+            if (!str) return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
+
+        // دالة تحويل روابط جوجل درايف إلى روابط عرض مباشرة بجميع الصيغ
+        function sanitizeURL(url) {
+            if (!url) return DEFAULT_FALLBACK_IMAGE;
+            let trimmed = url.trim();
+
+            // التعرف على معرف الملف من مختلف صيغ روابط Google Drive
+            let fileId = null;
+
+            if (trimmed.includes('drive.google.com')) {
+                // صيغة /file/d/ID
+                const matchFile = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchFile && matchFile[1]) {
+                    fileId = matchFile[1];
+                } 
+                // صيغة id=ID
+                else {
+                    const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                    if (matchId && matchId[1]) {
+                        fileId = matchId[1];
+                    }
+                }
+            } else if (trimmed.includes('googleusercontent.com/d/')) {
+                const matchDirect = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchDirect && matchDirect[1]) {
+                    fileId = matchDirect[1];
+                }
+            }
+
+            if (fileId) {
+                return `https://lh3.googleusercontent.com/d/${fileId}`;
+            }
+
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
+                return trimmed;
+            }
+
+            return DEFAULT_FALLBACK_IMAGE;
+        }
+
+        async function fetchNewsFromCloud() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('news')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) throw error;
+                cachedNews = data || [];
+                renderInterface();
+            } catch (err) {
+                console.error('Error fetching news:', err);
+            }
+        }
+
+        function setupRealtimeSubscription() {
+            supabaseClient
+                .channel('news-realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, payload => {
+                    fetchNewsFromCloud();
+                })
+                .subscribe();
+        }
+
+        function renderInterface() {
+            const list = document.getElementById('news-list');
+            const ticker = document.getElementById('ticker-track');
+            const adminContainer = document.getElementById('admin-items-container');
+            
+            list.innerHTML = '';
+            ticker.innerHTML = '';
+            if (adminContainer) adminContainer.innerHTML = '';
+
+            if (cachedNews.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
+                ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
+                if (adminContainer) adminContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">لا توجد أخبار سابقة لتعديلها.</p>';
+                return;
+            }
+
+            cachedNews.forEach(item => {
+                const cleanTitle = sanitizeText(item.title);
+                const cleanImg = sanitizeURL(item.img);
+                const cleanContent = sanitizeText(item.content);
+                const cleanDate = sanitizeText(item.date || 'اليوم');
+                const excerpt = cleanContent.length > 130 ? cleanContent.substring(0, 130) + '...' : cleanContent;
+
+                const tickerSpan = document.createElement('span');
+                tickerSpan.className = 'ticker-item';
+                tickerSpan.textContent = cleanTitle;
+                ticker.appendChild(tickerSpan);
+
+                const card = document.createElement('div');
+                card.className = 'horizontal-card';
+
+                card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <span class="card-category">نشاط مدرسي</span>
+                        <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
+                    </div>
+                    <div class="card-content">
+                        <div>
+                            <h3 class="card-title">${cleanTitle}</h3>
+                            <p class="card-excerpt">${excerpt}</p>
+                        </div>
+                        <div class="card-footer">
+                            <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
+                            <span class="read-more-btn">
+                                إكمال قراءة الموضوع <i class="fa-solid fa-arrow-left"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+
+                const imgWrap = card.querySelector('.card-img-wrap');
+                const titleEl = card.querySelector('.card-title');
+                const readBtn = card.querySelector('.read-more-btn');
+
+                [imgWrap, titleEl, readBtn].forEach(el => {
+                    el.addEventListener('click', () => openArticle(item.id));
+                });
+
+                list.appendChild(card);
+
+                if (adminContainer) {
+                    const adminItem = document.createElement('div');
+                    adminItem.className = 'admin-news-item';
+                    adminItem.innerHTML = `
+                        <span>${cleanTitle}</span>
+                        <button class="btn-delete-single" onclick="deleteSingleNews(${item.id})">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </button>
+                    `;
+                    adminContainer.appendChild(adminItem);
+                }
+            });
+        }
+
+        function showHome() {
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openArticle(id) {
+            const article = cachedNews.find(n => n.id === id);
+            
+            if (article) {
+                const artImg = document.getElementById('art-img');
+                document.getElementById('art-title').textContent = article.title;
+                artImg.src = sanitizeURL(article.img);
+                artImg.onerror = function() {
+                    this.onerror = null;
+                    this.src = DEFAULT_FALLBACK_IMAGE;
+                };
+                document.getElementById('art-content').textContent = article.content;
+                document.getElementById('art-date').textContent = article.date || 'غير محدد';
+
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('article-view').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
+        function closeLoginModal() { 
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('admin-pass').value = '';
+        }
+        function handleEnter(e) { if(e.key === 'Enter') verifyAdmin(); }
+
+        function verifyAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === getStoredPassword()) {
+                closeLoginModal();
+                const adminView = document.getElementById('admin-view');
+                adminView.style.display = 'block';
+                renderInterface();
+                adminView.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('الرقم السري غير صحيح!');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-view').style.display = 'none';
+        }
+
+        function openChangePassModal() {
+            document.getElementById('change-pass-modal').style.display = 'flex';
+        }
+
+        function closeChangePassModal() {
+            document.getElementById('change-pass-modal').style.display = 'none';
+            document.getElementById('curr-pass').value = '';
+            document.getElementById('new-pass').value = '';
+        }
+
+        function saveNewPassword() {
+            const currPass = document.getElementById('curr-pass').value;
+            const newPass = document.getElementById('new-pass').value.trim();
+
+            if (currPass !== getStoredPassword()) {
+                alert('الرقم السري الحالي غير صحيح!');
+                return;
+            }
+
+            if (!newPass) {
+                alert('يرجى إدخال الرقم السري الجديد.');
+                return;
+            }
+
+            setStoredPassword(newPass);
+            alert('تم تغيير الرقم السري بنجاح!');
+            closeChangePassModal();
+        }
+
+        function scrollToNewsForm() {
+            document.getElementById('inp-title').focus();
+            document.getElementById('news-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function publishNews(e) {
+            e.preventDefault();
+            
+            const rawTitle = document.getElementById('inp-title').value.trim();
+            const rawImg = document.getElementById('inp-img').value.trim();
+            const rawContent = document.getElementById('inp-content').value.trim();
+
+            if (!rawTitle || !rawImg || !rawContent) {
+                alert('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح.');
+                return;
+            }
+
+            const processedImg = sanitizeURL(rawImg);
+
+            const newArticle = {
+                title: rawTitle,
+                img: processedImg,
+                content: rawContent,
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('news')
+                    .insert([newArticle]);
+
+                if (error) throw error;
+
+                alert('تم نشر الخبر بنجاح في السحابة!');
+                document.getElementById('news-form').reset();
+                closeAdminPanel();
+                showHome();
+            } catch (err) {
+                alert('حدث خطأ في النشر، يرجى التأكد من إعدادات Supabase.');
+                console.error(err);
+            }
+        }
+
+        async function deleteSingleNews(id) {
+            if (confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر؟')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('news')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                } catch (err) {
+                    alert('حدث خطأ أثناء الحذف.');
+                }
+            }
+        }
+
+        async function clearAllNews() {
+            if (confirm('تحذير: هل أنت متأكد من حذف جميع الأخبار السابقة نهائياً؟')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('news')
+                        .delete()
+                        .neq('id', 0);
+
+                    if (error) throw error;
+                    alert('تم مسح جميع الأخبار بنجاح.');
+                } catch (err) {
+                    alert('حدث خطأ أثناء مسح الأخبار.');
+                }
+            }
+        }
+
+        fetchNewsFromCloud();
+        setupRealtimeSubscription();
+    </script>
+</body>
+</html>
