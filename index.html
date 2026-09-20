@@ -1,4 +1,3 @@
-l
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -12,7 +11,6 @@ l
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Changa:wght@500;700&display=swap" rel="stylesheet">
     <!-- أيقونات FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
 
     <style>
         :root {
@@ -23,18 +21,22 @@ l
             --card-bg: #FFFFFF;
             --text-dark: #1E293B;
             --text-muted: #64748B;
-            --danger-color: #EF4444;
             --radius: 16px;
             --shadow: 0 10px 25px -5px rgba(27, 54, 93, 0.08);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* حماية حظر تحديد النصوص */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Cairo', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -55,29 +57,32 @@ l
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-bottom: 4px solid var(--school-gold);
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .header-side-img {
+            width: clamp(65px, 12vw, 110px);
+            height: clamp(65px, 12vw, 110px);
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid var(--school-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            flex-shrink: 0;
+        }
+
+        .header-center {
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        .developer-badge {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--school-gold);
-            border: 1px solid var(--school-gold);
-            padding: 4px 16px;
-            border-radius: 20px;
-            font-size: clamp(0.85rem, 2vw, 0.95rem);
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            flex: 1;
         }
 
         .logo {
             font-family: 'Changa', sans-serif;
-            font-size: clamp(1.3rem, 3.8vw, 2.2rem);
+            font-size: clamp(1.2rem, 3.2vw, 2.2rem);
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -91,7 +96,7 @@ l
         .logo i { color: var(--school-gold); }
 
         .school-subtitle {
-            font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+            font-size: clamp(0.8rem, 2.2vw, 1.05rem);
             color: #E2E8F0;
             margin-top: 8px;
             font-weight: 400;
@@ -99,11 +104,26 @@ l
             width: 100%;
         }
 
+        .developer-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--school-gold);
+            border: 1px solid var(--school-gold);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: clamp(0.75rem, 1.8vw, 0.95rem);
+            font-weight: 700;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
         .ticker-wrapper {
             background: var(--card-bg);
             border-bottom: 1px solid #E2E8F0;
             display: flex;
-            height: 48px;
+            height: 52px;
             overflow: hidden;
             position: relative;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
@@ -135,12 +155,25 @@ l
             animation: ticker 35s linear infinite;
         }
 
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
         .ticker-item {
             display: inline-block;
             margin-left: 40px;
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--school-navy);
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .ticker-item:hover {
+            background: #FEF3C7;
+            color: var(--school-green);
         }
 
         .ticker-item::after {
@@ -154,19 +187,41 @@ l
         }
 
         .main-container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: clamp(1rem, 4vw, 2.5rem) auto;
             padding: 0 clamp(10px, 3vw, 20px);
             flex: 1;
             width: 100%;
         }
 
-        .news-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        /* الحاوية الخارجية للأخبار المتحركة */
+        .cards-slider-wrapper {
+            width: 100%;
+            overflow: hidden;
+            padding: 10px 0 25px 0;
+            position: relative;
         }
 
+        /* الشريط الأفقي المتحرك للكروت */
+        .news-list-track {
+            display: flex;
+            gap: 25px;
+            width: max-content;
+            animation: scrollCards 35s linear infinite;
+        }
+
+        /* توقف حركة كروت الأخبار عند مرور الماوس أو الضغط عليها */
+        .cards-slider-wrapper:hover .news-list-track,
+        .news-list-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollCards {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 12.5px)); }
+        }
+
+        /* تصميم كرت الخبر الأفقي المميز */
         .horizontal-card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -174,19 +229,22 @@ l
             box-shadow: var(--shadow);
             transition: var(--transition);
             display: flex;
+            flex-direction: column;
             border: 1px solid #EDF2F7;
             position: relative;
+            width: 320px;
+            flex-shrink: 0;
         }
 
         .horizontal-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px rgba(27, 54, 93, 0.12);
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(27, 54, 93, 0.15);
             border-color: var(--school-gold);
         }
 
         .card-img-wrap {
-            width: 35%;
-            min-width: 250px;
+            width: 100%;
+            height: 200px;
             position: relative;
             cursor: pointer;
             overflow: hidden;
@@ -218,15 +276,16 @@ l
         }
 
         .card-content {
-            width: 65%;
-            padding: clamp(15px, 3vw, 24px);
+            width: 100%;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            flex: 1;
         }
 
         .card-title {
-            font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+            font-size: 1.1rem;
             font-weight: 700;
             line-height: 1.4;
             color: var(--school-navy);
@@ -240,7 +299,7 @@ l
 
         .card-excerpt {
             color: var(--text-muted);
-            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            font-size: 0.88rem;
             line-height: 1.6;
             margin-bottom: 15px;
             word-break: break-word;
@@ -256,6 +315,7 @@ l
             color: var(--text-muted);
             flex-wrap: wrap;
             gap: 10px;
+            margin-top: auto;
         }
 
         .read-more-btn {
@@ -344,12 +404,7 @@ l
             max-width: 1100px;
             margin: 0 auto;
             padding: 25px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            text-align: right;
+            text-align: center;
         }
 
         .rights-text {
@@ -358,210 +413,30 @@ l
             font-weight: 600;
         }
 
-        .admin-trigger-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .admin-trigger-btn:hover {
-            background: var(--school-gold);
-            color: var(--school-navy);
-            border-color: var(--school-gold);
-        }
-
-        .admin-section {
-            display: none;
-            background: white;
-            color: var(--text-dark);
-            padding: clamp(20px, 4vw, 35px);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin: 20px auto 40px auto;
-            max-width: 800px;
-        }
-
-        .btn-action-panel {
-            background: #F1F5F9;
-            color: var(--school-navy);
-            border: 1px solid #CBD5E1;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
-            transition: var(--transition);
-        }
-
-        .btn-action-panel:hover {
-            background: var(--school-gold);
-            color: var(--school-navy);
-            border-color: var(--school-gold);
-        }
-
-        .btn-delete-all {
-            background: #FEE2E2;
-            color: var(--danger-color);
-            border: 1px solid #FCA5A5;
-        }
-
-        .btn-delete-all:hover {
-            background: var(--danger-color);
-            color: white;
-            border-color: var(--danger-color);
-        }
-
-        .admin-news-list {
-            margin-top: 30px;
-            border-top: 2px dashed #E2E8F0;
-            padding-top: 20px;
-        }
-
-        .admin-news-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
-
-        .admin-news-item span {
-            font-weight: 700;
-            color: var(--school-navy);
-            font-size: 0.95rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 70%;
-        }
-
-        .btn-delete-single {
-            background: #FEE2E2;
-            color: var(--danger-color);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-delete-single:hover {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-            color: var(--school-navy);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #E2E8F0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--school-green);
-            outline: none;
-        }
-
-        textarea.form-control {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        .btn-submit {
-            background: var(--school-green);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-submit:hover { background: #216325; }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.75);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-            padding: 20px;
-        }
-
-        .login-card {
-            background: white;
-            padding: clamp(25px, 5vw, 35px);
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px; right: 15px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: #94A3B8;
-        }
-
-        @media (max-width: 768px) {
-            .horizontal-card { flex-direction: column; }
-            .card-img-wrap { width: 100%; height: 200px; }
-            .card-content { width: 100%; }
-            .footer-content { flex-direction: column; text-align: center; }
+        @media (max-width: 480px) {
+            .header-side-img {
+                width: 55px;
+                height: 55px;
+            }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <header class="header">
-        <div class="developer-badge">
-            <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
+        <img class="header-side-img" src="Gemini_Generated_Image_volctwvolctwvolc.jfif" alt="اليوم الوطني الـ 96">
+        
+        <div class="header-center">
+            <div class="logo">
+                <i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية
+            </div>
+            <div class="school-subtitle">النافذة الإخبارية والأنشطة المدرسية الرسمية</div>
+            <div class="developer-badge">
+                <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
+            </div>
         </div>
-        <div class="logo">
-            <i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية
-        </div>
-        <div class="school-subtitle">النافذة الإخبارية والأنشطة المدرسية الرسمية</div>
+
+        <img class="header-side-img" src="Gemini_Generated_Image_volctwvolctwvolc.jfif" alt="اليوم الوطني الـ 96">
     </header>
 
     <div class="ticker-wrapper">
@@ -572,9 +447,10 @@ l
     </div>
 
     <div class="main-container">
-        
         <div id="home-view">
-            <div class="news-list" id="news-list"></div>
+            <div class="cards-slider-wrapper">
+                <div class="news-list-track" id="news-list"></div>
+            </div>
         </div>
 
         <div id="article-view" class="article-page">
@@ -589,120 +465,20 @@ l
             <img id="art-img" class="article-img" src="" alt="صورة الخبر" referrerpolicy="no-referrer">
             <div id="art-content" class="article-text"></div>
         </div>
-
-        <div id="admin-view" class="admin-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 10px; flex-wrap: wrap;">
-                <h2 style="color: var(--school-navy); font-size: 1.3rem;"><i class="fa-solid fa-sliders"></i> لوحة إدارة الأخبار الإذاعية</h2>
-                
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-action-panel" onclick="scrollToNewsForm()">
-                        <i class="fa-solid fa-plus-circle"></i> إضافة خبر جديد
-                    </button>
-                    <button class="btn-action-panel btn-delete-all" onclick="clearAllNews()">
-                        <i class="fa-solid fa-trash-can"></i> حذف الأخبار السابقة
-                    </button>
-                    <button class="btn-action-panel" onclick="openChangePassModal()">
-                        <i class="fa-solid fa-key"></i> تغيير الرقم السري
-                    </button>
-                    <button class="back-btn" style="margin-bottom:0;" onclick="closeAdminPanel()">إغلاق اللوحة</button>
-                </div>
-            </div>
-            
-            <form id="news-form" onsubmit="publishNews(event)">
-                <div class="form-group">
-                    <label class="form-label">عنوان الفعالية / الخبر:</label>
-                    <input type="text" id="inp-title" class="form-control" maxlength="150" required placeholder="مثال: تكريم الطلاب المتفوقين في الأنشطة...">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">رابط صورة الخبر (يقبل رابط Google Drive المباشر أو أي رابط صورة):</label>
-                    <input type="url" id="inp-img" class="form-control" required placeholder="مثال: https://drive.google.com/file/d/XXXX/view?usp=sharing">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">التفاصيل والتقرير الإخباري الكامل:</label>
-                    <textarea id="inp-content" class="form-control" maxlength="5000" required placeholder="اكتب التفاصيل الكاملة للخبر المدرسي هنا..."></textarea>
-                </div>
-                <button type="submit" class="btn-submit">
-                    <i class="fa-solid fa-paper-plane"></i> إضافة خبر جديد ونشره فوراً
-                </button>
-            </form>
-
-            <div class="admin-news-list">
-                <h3 style="font-size: 1.1rem; color: var(--school-navy); margin-bottom: 15px;">
-                    <i class="fa-solid fa-list-check"></i> التحكم بالأخبار المنشورة حالياً:
-                </h3>
-                <div id="admin-items-container"></div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="modal-overlay" id="login-modal">
-        <div class="login-card">
-            <i class="fa-solid fa-xmark close-modal" onclick="closeLoginModal()"></i>
-            <h3 style="margin-bottom: 15px; color: var(--school-navy);"><i class="fa-solid fa-lock"></i> دخول إدارة الإذاعة المدرسية</h3>
-            <p style="font-size:0.85rem; color:#64748B; margin-bottom:20px;">أدخل الرقم السري للوصول للوحة التحكم</p>
-            <div class="form-group">
-                <input type="password" id="admin-pass" class="form-control" placeholder="أدخل الرقم السري..." onkeypress="handleEnter(event)">
-            </div>
-            <button class="btn-submit" onclick="verifyAdmin()">تسجيل الدخول</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="change-pass-modal">
-        <div class="login-card">
-            <i class="fa-solid fa-xmark close-modal" onclick="closeChangePassModal()"></i>
-            <h3 style="margin-bottom: 15px; color: var(--school-navy);"><i class="fa-solid fa-key"></i> تغيير الرقم السري</h3>
-            <div class="form-group" style="text-align: right;">
-                <label class="form-label" style="font-size: 0.85rem;">الرقم السري الحالي:</label>
-                <input type="password" id="curr-pass" class="form-control" placeholder="الرقم السري الحالي">
-            </div>
-            <div class="form-group" style="text-align: right;">
-                <label class="form-label" style="font-size: 0.85rem;">الرقم السري الجديد:</label>
-                <input type="password" id="new-pass" class="form-control" placeholder="الرقم السري الجديد">
-            </div>
-            <button class="btn-submit" onclick="saveNewPassword()">حفظ الرقم السري الجديد</button>
-        </div>
     </div>
 
     <footer>
         <div class="footer-content">
-            <div>
-                <p style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</p>
-                <p class="rights-text">جميع الحقوق محفوظة © مدرسة عمار بن ياسر الابتدائية</p>
-            </div>
-            <button class="admin-trigger-btn" onclick="openLoginModal()">
-                <i class="fa-solid fa-user-gear"></i> لوحة التحكم والمسؤول
-            </button>
+            <p style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</p>
+            <p class="rights-text">جميع الحقوق محفوظة © مدرسة عمار بن ياسر الابتدائية</p>
         </div>
     </footer>
 
     <script>
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsyMykB23CjU_MQjDrDMnm7XT49Uv6cV1fcCdeAFFGum3QDqvZJ0483If-Bh1JSkIY/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1v7oSksXu9v0q_HBowNCES2paP8GzMftB';
 
-        /* ============================================================
-           إعدادات الربط بجوجل شيت
-           ضع بالأسفل رابط تطبيق الويب الخاص بـ Google Apps Script
-           (الرابط الذي ينتهي بكلمة /exec)
-           ============================================================ */
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyxuWtoNK2O5_cn5SZjf7H8PlNPVMS7HzDxe27G2UnS0-mrsEHlx7CW1PGYvdf2OwKS/exec';
-
-        // مدة التحديث التلقائي للأخبار بالمللي ثانية (20 ثانية)
-        const REFRESH_MS = 20000;
-
         let cachedNews = [];
-        let adminPass = '';   // يُحفظ في الذاكرة فقط أثناء الجلسة، ولا يُخزّن في المتصفح
-
-        // دالة موحّدة لإرسال الطلبات إلى جوجل شيت
-        async function apiPost(payload) {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-            return await res.json();
-        }
 
         function sanitizeText(str) {
             if (!str) return '';
@@ -711,149 +487,145 @@ l
             return temp.innerHTML;
         }
 
-        // دالة تحويل روابط جوجل درايف إلى روابط عرض مباشرة بجميع الصيغ
         function sanitizeURL(url) {
             if (!url) return DEFAULT_FALLBACK_IMAGE;
-            let trimmed = url.trim();
-
-            // التعرف على معرف الملف من مختلف صيغ روابط Google Drive
+            let trimmed = String(url).trim();
             let fileId = null;
 
             if (trimmed.includes('drive.google.com')) {
-                // صيغة /file/d/ID
                 const matchFile = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
                 if (matchFile && matchFile[1]) {
                     fileId = matchFile[1];
-                } 
-                // صيغة id=ID
-                else {
+                } else {
                     const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-                    if (matchId && matchId[1]) {
-                        fileId = matchId[1];
-                    }
+                    if (matchId && matchId[1]) fileId = matchId[1];
                 }
             } else if (trimmed.includes('googleusercontent.com/d/')) {
                 const matchDirect = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (matchDirect && matchDirect[1]) {
-                    fileId = matchDirect[1];
-                }
+                if (matchDirect && matchDirect[1]) fileId = matchDirect[1];
             }
 
-            if (fileId) {
-                return `https://lh3.googleusercontent.com/d/${fileId}`;
-            }
-
-            if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) {
-                return trimmed;
-            }
+            if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) return trimmed;
 
             return DEFAULT_FALLBACK_IMAGE;
         }
 
-        async function fetchNewsFromCloud() {
-            try {
-                const res = await fetch(API_URL + '?t=' + Date.now());
-                const data = await res.json();
-                cachedNews = Array.isArray(data) ? data : [];
-                renderInterface();
-            } catch (err) {
-                console.error('تعذر جلب الأخبار:', err);
-                const list = document.getElementById('news-list');
-                if (list && cachedNews.length === 0) {
-                    list.innerHTML = '<div style="text-align:center; padding:40px; color:var(--danger-color); font-weight:700;">تعذّر الاتصال بقاعدة البيانات. تأكد من صحة رابط API_URL.</div>';
-                }
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
             }
         }
 
-        // تحديث دوري تلقائي حتى تظهر أخبار المحرر على بقية الأجهزة
-        function setupRealtimeSubscription() {
-            setInterval(fetchNewsFromCloud, REFRESH_MS);
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) fetchNewsFromCloud();
+        function stopSpeaking() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        async function fetchNewsFromGoogleSheet() {
+            const list = document.getElementById('news-list');
+            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار من جوجل شيت...</div>';
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.json();
+                cachedNews = data || [];
+                renderInterface();
+            } catch (err) {
+                console.error('Error fetching news:', err);
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار، يرجى التأكد من نشر السكريبت بصلحية Anyone.</div>';
+            }
+        }
+
+        function createCardElement(item) {
+            const cleanTitle = sanitizeText(item.title);
+            const cleanImg = sanitizeURL(item.img);
+            const cleanContent = sanitizeText(item.content);
+            const cleanDate = sanitizeText(item.date || 'اليوم');
+            const excerpt = cleanContent.length > 90 ? cleanContent.substring(0, 90) + '...' : cleanContent;
+
+            const card = document.createElement('div');
+            card.className = 'horizontal-card';
+
+            card.innerHTML = `
+                <div class="card-img-wrap">
+                    <span class="card-category">نشاط مدرسي</span>
+                    <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h3 class="card-title">${cleanTitle}</h3>
+                        <p class="card-excerpt">${excerpt}</p>
+                    </div>
+                    <div class="card-footer">
+                        <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
+                        <span class="read-more-btn">
+                            قراءة الخبر <i class="fa-solid fa-arrow-left"></i>
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            const imgWrap = card.querySelector('.card-img-wrap');
+            const titleEl = card.querySelector('.card-title');
+            const readBtn = card.querySelector('.read-more-btn');
+
+            [imgWrap, titleEl, readBtn].forEach(el => {
+                el.addEventListener('click', () => openArticle(item.id));
             });
+
+            return card;
         }
 
         function renderInterface() {
             const list = document.getElementById('news-list');
             const ticker = document.getElementById('ticker-track');
-            const adminContainer = document.getElementById('admin-items-container');
             
             list.innerHTML = '';
             ticker.innerHTML = '';
-            if (adminContainer) adminContainer.innerHTML = '';
 
             if (cachedNews.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً في جوجل شيت.</div>';
                 ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
-                if (adminContainer) adminContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">لا توجد أخبار سابقة لتعديلها.</p>';
                 return;
             }
 
+            // تعبئة شريط الأخبار العلوي
             cachedNews.forEach(item => {
                 const cleanTitle = sanitizeText(item.title);
-                const cleanImg = sanitizeURL(item.img);
-                const cleanContent = sanitizeText(item.content);
-                const cleanDate = sanitizeText(item.date || 'اليوم');
-                const excerpt = cleanContent.length > 130 ? cleanContent.substring(0, 130) + '...' : cleanContent;
-
                 const tickerSpan = document.createElement('span');
                 tickerSpan.className = 'ticker-item';
                 tickerSpan.textContent = cleanTitle;
+                
+                tickerSpan.addEventListener('mouseenter', () => speakText(cleanTitle));
+                tickerSpan.addEventListener('mouseleave', () => stopSpeaking());
+                tickerSpan.addEventListener('click', () => openArticle(item.id));
                 ticker.appendChild(tickerSpan);
+            });
 
-                const card = document.createElement('div');
-                card.className = 'horizontal-card';
-
-                card.innerHTML = `
-                    <div class="card-img-wrap">
-                        <span class="card-category">نشاط مدرسي</span>
-                        <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
-                    </div>
-                    <div class="card-content">
-                        <div>
-                            <h3 class="card-title">${cleanTitle}</h3>
-                            <p class="card-excerpt">${excerpt}</p>
-                        </div>
-                        <div class="card-footer">
-                            <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
-                            <span class="read-more-btn">
-                                إكمال قراءة الموضوع <i class="fa-solid fa-arrow-left"></i>
-                            </span>
-                        </div>
-                    </div>
-                `;
-
-                const imgWrap = card.querySelector('.card-img-wrap');
-                const titleEl = card.querySelector('.card-title');
-                const readBtn = card.querySelector('.read-more-btn');
-
-                [imgWrap, titleEl, readBtn].forEach(el => {
-                    el.addEventListener('click', () => openArticle(item.id));
-                });
-
-                list.appendChild(card);
-
-                if (adminContainer) {
-                    const adminItem = document.createElement('div');
-                    adminItem.className = 'admin-news-item';
-                    adminItem.innerHTML = `
-                        <span>${cleanTitle}</span>
-                        <button class="btn-delete-single" onclick="deleteSingleNews(${item.id})">
-                            <i class="fa-solid fa-trash"></i> حذف
-                        </button>
-                    `;
-                    adminContainer.appendChild(adminItem);
-                }
+            // تعبئة بطاقات الأخبار بـ (نسختين) لضمان حركة الاستمرار الدائرية السلسة
+            cachedNews.forEach(item => {
+                list.appendChild(createCardElement(item));
+            });
+            cachedNews.forEach(item => {
+                list.appendChild(createCardElement(item));
             });
         }
 
         function showHome() {
+            stopSpeaking();
             document.getElementById('article-view').style.display = 'none';
             document.getElementById('home-view').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function openArticle(id) {
+            stopSpeaking();
             const article = cachedNews.find(n => n.id === id);
             
             if (article) {
@@ -873,137 +645,22 @@ l
             }
         }
 
-        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
-        function closeLoginModal() { 
-            document.getElementById('login-modal').style.display = 'none';
-            document.getElementById('admin-pass').value = '';
-        }
-        function handleEnter(e) { if(e.key === 'Enter') verifyAdmin(); }
-
-        async function verifyAdmin() {
-            const pass = document.getElementById('admin-pass').value;
-            if (!pass) { alert('يرجى إدخال الرقم السري.'); return; }
-
-            try {
-                const out = await apiPost({ action: 'auth', pass: pass });
-                if (out.ok) {
-                    adminPass = pass;
-                    closeLoginModal();
-                    const adminView = document.getElementById('admin-view');
-                    adminView.style.display = 'block';
-                    renderInterface();
-                    adminView.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert('الرقم السري غير صحيح!');
-                }
-            } catch (err) {
-                alert('تعذر الاتصال بالخادم. تأكد من رابط API_URL.');
+        // حماية الشفرة والمحتوى من النسخ والمعاينة
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (e) {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's' || e.key === 'A' || e.key === 'a' || e.key === 'P' || e.key === 'p'))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             }
-        }
+        });
+        document.addEventListener('dragstart', event => event.preventDefault());
 
-        function closeAdminPanel() {
-            document.getElementById('admin-view').style.display = 'none';
-        }
-
-        function openChangePassModal() {
-            document.getElementById('change-pass-modal').style.display = 'flex';
-        }
-
-        function closeChangePassModal() {
-            document.getElementById('change-pass-modal').style.display = 'none';
-            document.getElementById('curr-pass').value = '';
-            document.getElementById('new-pass').value = '';
-        }
-
-        async function saveNewPassword() {
-            const currPass = document.getElementById('curr-pass').value;
-            const newPass = document.getElementById('new-pass').value.trim();
-
-            if (!newPass) {
-                alert('يرجى إدخال الرقم السري الجديد.');
-                return;
-            }
-
-            try {
-                const out = await apiPost({ action: 'changePass', pass: currPass, newPass: newPass });
-                if (!out.ok) { alert('الرقم السري الحالي غير صحيح!'); return; }
-
-                adminPass = newPass;
-                alert('تم تغيير الرقم السري بنجاح لجميع الأجهزة!');
-                closeChangePassModal();
-            } catch (err) {
-                alert('تعذر الاتصال بالخادم.');
-            }
-        }
-
-        function scrollToNewsForm() {
-            document.getElementById('inp-title').focus();
-            document.getElementById('news-form').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function publishNews(e) {
-            e.preventDefault();
-            
-            const rawTitle = document.getElementById('inp-title').value.trim();
-            const rawImg = document.getElementById('inp-img').value.trim();
-            const rawContent = document.getElementById('inp-content').value.trim();
-
-            if (!rawTitle || !rawImg || !rawContent) {
-                alert('الرجاء ملء جميع الحقول المطلوبة بشكل صحيح.');
-                return;
-            }
-
-            const processedImg = sanitizeURL(rawImg);
-
-            const newArticle = {
-                title: rawTitle,
-                img: processedImg,
-                content: rawContent,
-                date: new Date().toLocaleDateString('ar-EG')
-            };
-
-            try {
-                const out = await apiPost({ action: 'add', pass: adminPass, article: newArticle });
-                if (!out.ok) throw new Error(out.msg || 'rejected');
-
-                await fetchNewsFromCloud();
-                alert('تم نشر الخبر بنجاح، وهو الآن ظاهر على جميع الأجهزة!');
-                document.getElementById('news-form').reset();
-                closeAdminPanel();
-                showHome();
-            } catch (err) {
-                alert('حدث خطأ في النشر، تأكد من رابط API_URL ومن تسجيل الدخول.');
-                console.error(err);
-            }
-        }
-
-        async function deleteSingleNews(id) {
-            if (confirm('هل أنت متأكد من رغبتك في حذف هذا الخبر؟')) {
-                try {
-                    const out = await apiPost({ action: 'delete', pass: adminPass, id: id });
-                    if (!out.ok) throw new Error('rejected');
-                    await fetchNewsFromCloud();
-                } catch (err) {
-                    alert('حدث خطأ أثناء الحذف.');
-                }
-            }
-        }
-
-        async function clearAllNews() {
-            if (confirm('تحذير: هل أنت متأكد من حذف جميع الأخبار السابقة نهائياً؟')) {
-                try {
-                    const out = await apiPost({ action: 'clearAll', pass: adminPass });
-                    if (!out.ok) throw new Error('rejected');
-                    await fetchNewsFromCloud();
-                    alert('تم مسح جميع الأخبار بنجاح.');
-                } catch (err) {
-                    alert('حدث خطأ أثناء مسح الأخبار.');
-                }
-            }
-        }
-
-        fetchNewsFromCloud();
-        setupRealtimeSubscription();
+        fetchNewsFromGoogleSheet();
     </script>
 </body>
 </html>
