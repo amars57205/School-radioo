@@ -1,4 +1,3 @@
-HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -476,7 +475,8 @@ HTML
     </footer>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7vl6lmuZGRI5Uld3vks33SvEyT1E7YtQZxNrQIVW7hfPMokMXAGztO5mojj9lzlYB/exec';
+        // رابط Google Apps Script الجديد
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8YIjWRWlJUjl5skeJRQ1YOHMjBaMAdHYfsAMkun_JRaDkd_tkOHt_IDZ3HHk7ouWK/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
 
         let cachedNews = [];
@@ -532,24 +532,24 @@ HTML
             if (Array.isArray(raw)) {
                 return {
                     id: index,
-                    title: raw[1] || raw[0] || 'خبر بدون عنوان',
-                    content: raw[2] || raw[1] || 'لا توجد تفاصيل لهذا الخبر.',
+                    title: raw[2] || raw[1] || raw[0] || 'خبر بدون عنوان',
+                    content: raw[4] || raw[3] || raw[1] || 'لا توجد تفاصيل لهذا الخبر.',
                     img: raw[3] || DEFAULT_FALLBACK_IMAGE,
-                    date: raw[0] || 'اليوم'
+                    date: raw[1] || 'اليوم'
                 };
             }
             return {
                 id: raw.id || index,
-                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[1] || Object.values(raw)[0] || 'خبر بدون عنوان',
-                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[2] || '',
+                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[2] || Object.values(raw)[0] || 'خبر بدون عنوان',
+                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[4] || '',
                 img: raw.img || raw['الصورة'] || raw['رابط الصورة'] || raw.image || raw.Img || Object.values(raw)[3] || DEFAULT_FALLBACK_IMAGE,
-                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || raw['الطابع الزمني'] || Object.values(raw)[0] || 'اليوم'
+                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || raw['الطابع الزمني'] || Object.values(raw)[1] || 'اليوم'
             };
         }
 
         async function fetchNewsFromGoogleSheet() {
             const list = document.getElementById('news-list');
-            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار من جوجل شيت...</div>';
+            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
 
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
@@ -620,7 +620,7 @@ HTML
             ticker.innerHTML = '';
 
             if (cachedNews.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً في جوجل شيت.</div>';
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
                 ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
                 return;
             }
