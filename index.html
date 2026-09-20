@@ -475,7 +475,8 @@
     </footer>
 
     <script>
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnqdYFwlx3O2AgTMlG8InacbblMaiYGAGszPrkU3yyIwR1xBUB_GTeLMjOTrdGtC5n/exec';
+        // تحديث الرابط برابط Google Apps Script الجديد
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNaReNwRGWE0NOO-HlSnYij45bTphwxoJsgvtgtVCTbGvflIvVCeULyalnt3TM_8Py/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
 
         let cachedNews = [];
@@ -527,7 +528,7 @@
             }
         }
 
-        // دالة تحويل الكائنات غير المعيارية المرتجعة من Apps Script لتتطابق مع الصفات المطلوبة
+        // تحويل ومطابقة أسماء الحقول المرتجعة من Apps Script سواء بالعربية أو الإنجليزية
         function normalizeItem(raw, index) {
             if (Array.isArray(raw)) {
                 return {
