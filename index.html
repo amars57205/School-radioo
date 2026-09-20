@@ -104,6 +104,29 @@
             width: 100%;
         }
 
+        /* زر إرسال خبر جديد */
+        .submit-news-btn {
+            background: linear-gradient(135deg, var(--school-gold), #D97706);
+            color: #FFFFFF;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: clamp(0.85rem, 2vw, 1rem);
+            font-weight: 700;
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transition: var(--transition);
+        }
+
+        .submit-news-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+            background: linear-gradient(135deg, #FBBF24, #D97706);
+        }
+
         .developer-badge {
             background: rgba(245, 158, 11, 0.15);
             color: var(--school-gold);
@@ -404,13 +427,29 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
 
         .rights-text {
             font-size: 0.95rem;
             color: #E2E8F0;
             font-weight: 600;
+        }
+
+        .footer-link {
+            color: var(--school-gold);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: #FBBF24;
+            text-decoration: underline;
         }
 
         @media (max-width: 480px) {
@@ -431,6 +470,11 @@
                 <i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية
             </div>
             <div class="school-subtitle">النافذة الإخبارية والأنشطة المدرسية الرسمية</div>
+            
+            <!-- زر إرسال الخبر للربط مع النموذج -->
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfSp5H1HNAMdmHhgckF33xL2uRpidYOTnrvdz-0iifi2X4W9Q/viewform?usp=sharing&ouid=110643031434790118719" target="_blank" class="submit-news-btn">
+                <i class="fa-solid fa-paper-plane"></i> إرسال خبر جديد
+            </a>
         </div>
 
         <img class="header-side-img" src="https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv" alt="اليوم الوطني الـ 96" referrerpolicy="no-referrer">
@@ -468,6 +512,9 @@
         <div class="footer-content">
             <p style="font-weight: 700; font-size: 1.1rem;">إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</p>
             <p class="rights-text">جميع الحقوق محفوظة © مدرسة عمار بن ياسر الابتدائية</p>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfSp5H1HNAMdmHhgckF33xL2uRpidYOTnrvdz-0iifi2X4W9Q/viewform?usp=sharing&ouid=110643031434790118719" target="_blank" class="footer-link">
+                <i class="fa-solid fa-pen-to-square"></i> نموذج رفع مشاركة إخبارية جديدة
+            </a>
             <div class="developer-badge">
                 <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
             </div>
@@ -475,8 +522,8 @@
     </footer>
 
     <script>
-        // تحديث الرابط برابط Google Apps Script الجديد
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNaReNwRGWE0NOO-HlSnYij45bTphwxoJsgvtgtVCTbGvflIvVCeULyalnt3TM_8Py/exec';
+        // رابط Google Apps Script الجديد
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7vl6lmuZGRI5Uld3vks33SvEyT1E7YtQZxNrQIVW7hfPMokMXAGztO5mojj9lzlYB/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
 
         let cachedNews = [];
@@ -528,23 +575,23 @@
             }
         }
 
-        // تحويل ومطابقة أسماء الحقول المرتجعة من Apps Script سواء بالعربية أو الإنجليزية
+        // مطابقة مرنة للحقول سواء كصفوف أرقام أو كمصفوفة كائنات بالعربية والإنجليزية
         function normalizeItem(raw, index) {
             if (Array.isArray(raw)) {
                 return {
                     id: index,
-                    title: raw[0] || raw[1] || 'خبر بدون عنوان',
-                    content: raw[1] || raw[0] || 'لا توجد تفاصيل لهذا الخبر.',
-                    img: raw[2] || DEFAULT_FALLBACK_IMAGE,
-                    date: raw[3] || 'اليوم'
+                    title: raw[1] || raw[0] || 'خبر بدون عنوان',
+                    content: raw[2] || raw[1] || 'لا توجد تفاصيل لهذا الخبر.',
+                    img: raw[3] || DEFAULT_FALLBACK_IMAGE,
+                    date: raw[0] || 'اليوم'
                 };
             }
             return {
                 id: raw.id || index,
-                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[0] || 'خبر بدون عنوان',
-                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[1] || '',
-                img: raw.img || raw['الصورة'] || raw['رابط الصورة'] || raw.image || raw.Img || Object.values(raw)[2] || DEFAULT_FALLBACK_IMAGE,
-                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || Object.values(raw)[3] || 'اليوم'
+                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[1] || Object.values(raw)[0] || 'خبر بدون عنوان',
+                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[2] || '',
+                img: raw.img || raw['الصورة'] || raw['رابط الصورة'] || raw.image || raw.Img || Object.values(raw)[3] || DEFAULT_FALLBACK_IMAGE,
+                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || raw['الطابع الزمني'] || Object.values(raw)[0] || 'اليوم'
             };
         }
 
@@ -626,7 +673,7 @@
                 return;
             }
 
-            // تعبئة شريط الأخبار العلوي
+            // شريط الأخبار
             cachedNews.forEach(item => {
                 const cleanTitle = sanitizeText(item.title);
                 const tickerSpan = document.createElement('span');
@@ -639,7 +686,7 @@
                 ticker.appendChild(tickerSpan);
             });
 
-            // تعبئة بطاقات الأخبار بـ (نسختين) لضمان حركة الاستمرار الدائرية السلسة
+            // تعبئة بطاقات الأخبار نسختين لضمان السلاسة والدوران المستمر
             cachedNews.forEach(item => {
                 list.appendChild(createCardElement(item));
             });
@@ -676,7 +723,7 @@
             }
         }
 
-        // حماية الشفرة والمحتوى من النسخ والمعاينة
+        // إعدادات الحماية والأمان من النسخ والمعاينة
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.addEventListener('keydown', function (e) {
             if (
