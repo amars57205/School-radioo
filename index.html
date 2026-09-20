@@ -194,7 +194,6 @@
             width: 100%;
         }
 
-        /* الحاوية الخارجية للأخبار المتحركة */
         .cards-slider-wrapper {
             width: 100%;
             overflow: hidden;
@@ -202,7 +201,6 @@
             position: relative;
         }
 
-        /* الشريط الأفقي المتحرك للكروت */
         .news-list-track {
             display: flex;
             gap: 25px;
@@ -210,7 +208,6 @@
             animation: scrollCards 35s linear infinite;
         }
 
-        /* توقف حركة كروت الأخبار عند مرور الماوس أو الضغط عليها */
         .cards-slider-wrapper:hover .news-list-track,
         .news-list-track:hover {
             animation-play-state: paused;
@@ -221,7 +218,6 @@
             100% { transform: translateX(calc(-50% - 12.5px)); }
         }
 
-        /* تصميم كرت الخبر الأفقي المميز */
         .horizontal-card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -479,7 +475,6 @@
     </footer>
 
     <script>
-        // تم تحديث رابط Google Apps Script الخاص بجوجل شيت
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnqdYFwlx3O2AgTMlG8InacbblMaiYGAGszPrkU3yyIwR1xBUB_GTeLMjOTrdGtC5n/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
 
@@ -532,14 +527,44 @@
             }
         }
 
+        // دالة تحويل الكائنات غير المعيارية المرتجعة من Apps Script لتتطابق مع الصفات المطلوبة
+        function normalizeItem(raw, index) {
+            if (Array.isArray(raw)) {
+                return {
+                    id: index,
+                    title: raw[0] || raw[1] || 'خبر بدون عنوان',
+                    content: raw[1] || raw[0] || 'لا توجد تفاصيل لهذا الخبر.',
+                    img: raw[2] || DEFAULT_FALLBACK_IMAGE,
+                    date: raw[3] || 'اليوم'
+                };
+            }
+            return {
+                id: raw.id || index,
+                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[0] || 'خبر بدون عنوان',
+                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[1] || '',
+                img: raw.img || raw['الصورة'] || raw['رابط الصورة'] || raw.image || raw.Img || Object.values(raw)[2] || DEFAULT_FALLBACK_IMAGE,
+                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || Object.values(raw)[3] || 'اليوم'
+            };
+        }
+
         async function fetchNewsFromGoogleSheet() {
             const list = document.getElementById('news-list');
             list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار من جوجل شيت...</div>';
 
             try {
                 const response = await fetch(APPS_SCRIPT_URL);
-                const data = await response.json();
-                cachedNews = data || [];
+                const rawData = await response.json();
+                
+                let listData = [];
+                if (Array.isArray(rawData)) {
+                    listData = rawData;
+                } else if (rawData.data && Array.isArray(rawData.data)) {
+                    listData = rawData.data;
+                } else if (rawData.items && Array.isArray(rawData.items)) {
+                    listData = rawData.items;
+                }
+
+                cachedNews = listData.map((item, idx) => normalizeItem(item, idx));
                 renderInterface();
             } catch (err) {
                 console.error('Error fetching news:', err);
