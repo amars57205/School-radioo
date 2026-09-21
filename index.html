@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -194,7 +195,6 @@
             width: 100%;
         }
 
-        /* أزرار التنقل الرئيسية في أعلى بطاقات الصفحة الرئيسية */
         .home-navigation-bar {
             display: flex;
             justify-content: center;
@@ -230,7 +230,6 @@
             transform: translateY(0);
         }
 
-        /* حاوية العرض التفاعلي */
         .cards-slider-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -363,7 +362,6 @@
 
         .read-more-btn:hover { gap: 8px; }
 
-        /* صفحة تفاصيل الخبر */
         .article-page {
             display: none;
             background: var(--card-bg);
@@ -496,9 +494,7 @@
     </div>
 
     <div class="main-container">
-        <!-- واجهة الصفحة الرئيسية -->
         <div id="home-view">
-            <!-- أزرار التحكم في التصفح ببطاقات الصفحة الرئيسية -->
             <div class="home-navigation-bar">
                 <button class="home-nav-btn" onclick="scrollNewsList('prev')">
                     <i class="fa-solid fa-chevron-right"></i> الخبر السابق
@@ -513,7 +509,6 @@
             </div>
         </div>
 
-        <!-- صفحة عرض تفاصيل الخبر -->
         <div id="article-view" class="article-page">
             <button class="back-btn" onclick="showHome()">
                 <i class="fa-solid fa-arrow-right"></i>
@@ -596,22 +591,22 @@
             }
         }
 
-        function normalizeItem(raw, index) {
+        function parseRawItem(raw, index) {
             if (Array.isArray(raw)) {
                 return {
                     id: index,
-                    title: raw[2] || raw[1] || raw[0] || 'خبر بدون عنوان',
-                    content: raw[4] || raw[3] || raw[1] || 'لا توجد تفاصيل لهذا الخبر.',
-                    img: raw[3] || DEFAULT_FALLBACK_IMAGE,
-                    date: raw[1] || 'اليوم'
+                    date: raw[0] ? String(raw[0]) : 'اليوم',
+                    title: raw[1] ? String(raw[1]).trim() : '',
+                    content: raw[2] ? String(raw[2]).trim() : '',
+                    img: raw[3] ? String(raw[3]).trim() : DEFAULT_FALLBACK_IMAGE
                 };
             }
             return {
                 id: raw.id || index,
-                title: raw.title || raw['العنوان'] || raw['عنوان الخبر'] || raw.Title || raw.name || Object.values(raw)[2] || Object.values(raw)[0] || 'خبر بدون عنوان',
-                content: raw.content || raw['المحتوى'] || raw['التفاصيل'] || raw['تفاصيل الخبر'] || raw.Content || raw.details || Object.values(raw)[4] || '',
-                img: raw.img || raw['الصورة'] || raw['رابط الصورة'] || raw.image || raw.Img || Object.values(raw)[3] || DEFAULT_FALLBACK_IMAGE,
-                date: raw.date || raw['التاريخ'] || raw['تاريخ النشر'] || raw.Date || raw['الطابع الزمني'] || Object.values(raw)[1] || 'اليوم'
+                date: raw.date || raw['التاريخ'] || raw['الطابع الزمني'] || 'اليوم',
+                title: (raw.title || raw['العنوان'] || raw['عنوان الخبر'] || '').toString().trim(),
+                content: (raw.content || raw['المحتوى'] || raw['التفاصيل'] || '').toString().trim(),
+                img: (raw.img || raw['الصورة'] || raw['رابط الصورة'] || '').toString().trim() || DEFAULT_FALLBACK_IMAGE
             };
         }
 
@@ -620,7 +615,9 @@
             list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
 
             try {
-                const response = await fetch(APPS_SCRIPT_URL);
+                // استخدام طابع زمني لمنع تخزين الكاش في المتصفح وجلب البيانات الحية مباشرة من Google Sheet
+                const liveUrl = APPS_SCRIPT_URL + '?nocache=' + new Date().getTime();
+                const response = await fetch(liveUrl);
                 const rawData = await response.json();
                 
                 let listData = [];
@@ -632,7 +629,16 @@
                     listData = rawData.items;
                 }
 
-                cachedNews = listData.map((item, idx) => normalizeItem(item, idx));
+                // قراءة الصفوف التي تحتوي فقط على عنوان حقيقي وغير فارغ
+                const validNews = [];
+                listData.forEach((item, idx) => {
+                    const parsed = parseRawItem(item, idx);
+                    if (parsed.title !== '') {
+                        validNews.push(parsed);
+                    }
+                });
+
+                cachedNews = validNews;
                 renderInterface();
             } catch (err) {
                 console.error('Error fetching news:', err);
@@ -688,7 +694,7 @@
             ticker.innerHTML = '';
 
             if (cachedNews.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً في الشيت.</div>';
                 ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
                 return;
             }
@@ -705,16 +711,15 @@
                 ticker.appendChild(tickerSpan);
             });
 
-            /* إضافة كروت الأخبار مرة واحدة فقط دون تكرار */
+            // عرض بطاقات الصفوف المكتوبة فعلياً وحالياً في جوجل شيت فقط
             cachedNews.forEach(item => {
                 list.appendChild(createCardElement(item));
             });
         }
 
-        /* دالة التمرير اليدوي بواسطة أزرار التحكم في الصفحة الرئيسية */
         function scrollNewsList(direction) {
             const wrapper = document.getElementById('slider-wrapper');
-            const scrollAmount = 345; // عرض البطاقة مع المسافة
+            const scrollAmount = 345;
             
             if (direction === 'next') {
                 wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
