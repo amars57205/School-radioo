@@ -1,3 +1,4 @@
+HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -571,56 +572,42 @@
             }
         }
 
-        function parseRawItem(raw, index) {
-            if (Array.isArray(raw)) {
-                return {
-                    id: index,
-                    date: raw[0] ? String(raw[0]) : 'اليوم',
-                    title: raw[1] ? String(raw[1]).trim() : '',
-                    content: raw[2] ? String(raw[2]).trim() : '',
-                    img: raw[3] ? String(raw[3]).trim() : DEFAULT_FALLBACK_IMAGE
-                };
-            }
-            return {
-                id: raw.id || index,
-                date: raw.date || raw['التاريخ'] || raw['الطابع الزمني'] || 'اليوم',
-                title: (raw.title || raw['العنوان'] || raw['عنوان الخبر'] || '').toString().trim(),
-                content: (raw.content || raw['المحتوى'] || raw['التفاصيل'] || '').toString().trim(),
-                img: (raw.img || raw['الصورة'] || raw['رابط الصورة'] || '').toString().trim() || DEFAULT_FALLBACK_IMAGE
-            };
-        }
-
         async function fetchNewsFromGoogleSheet() {
             const list = document.getElementById('news-list');
-            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
+            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات المباشرة...</div>';
 
             try {
-                const liveUrl = APPS_SCRIPT_URL + '?nocache=' + new Date().getTime();
-                const response = await fetch(liveUrl);
+                // إضافة طابع زمني دقيق لمنع المتصفح من تخزين النتيجة كاش
+                const fetchUrl = APPS_SCRIPT_URL + '?t=' + new Date().getTime();
+                const response = await fetch(fetchUrl, { cache: 'no-store' });
                 const rawData = await response.json();
                 
-                let listData = [];
-                if (Array.isArray(rawData)) {
-                    listData = rawData;
-                } else if (rawData.data && Array.isArray(rawData.data)) {
-                    listData = rawData.data;
-                } else if (rawData.items && Array.isArray(rawData.items)) {
-                    listData = rawData.items;
-                }
+                let listData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || []);
 
-                const validNews = [];
-                listData.forEach((item, idx) => {
-                    const parsed = parseRawItem(item, idx);
-                    if (parsed.title !== '') {
-                        validNews.push(parsed);
+                const cleanList = [];
+                listData.forEach((item, index) => {
+                    let title = (item.title || item['العنوان'] || '').toString().trim();
+                    let content = (item.content || item['المحتوى'] || item['التفاصيل'] || '').toString().trim();
+                    let img = (item.img || item['الصورة'] || '').toString().trim();
+                    let date = item.date || item['التاريخ'] || 'اليوم';
+
+                    // إغلاق إمكانية عرض الأخبار الخالية من العناوين أو المحذوفة
+                    if (title !== "" && title !== "undefined") {
+                        cleanList.push({
+                            id: item.id || index,
+                            title: title,
+                            content: content,
+                            img: img || DEFAULT_FALLBACK_IMAGE,
+                            date: date
+                        });
                     }
                 });
 
-                cachedNews = validNews;
+                cachedNews = cleanList;
                 renderInterface();
             } catch (err) {
                 console.error('Error fetching news:', err);
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار، يرجى التأكد من نشر السكريبت بصلحية Anyone.</div>';
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار المباشرة.</div>';
             }
         }
 
