@@ -230,7 +230,7 @@
             transform: translateY(0);
         }
 
-        /* حاوية العرض التفاعلي مع استمرار الحركة التلقائية */
+        /* حاوية العرض التفاعلي */
         .cards-slider-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -252,18 +252,7 @@
             display: flex;
             gap: 25px;
             width: max-content;
-            animation: scrollCards 35s linear infinite;
             padding: 0 20px;
-        }
-
-        .cards-slider-wrapper:hover .news-list-track,
-        .news-list-track:hover {
-            animation-play-state: paused;
-        }
-
-        @keyframes scrollCards {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-50% - 12.5px)); }
         }
 
         .horizontal-card {
@@ -555,7 +544,6 @@
     </footer>
 
     <script>
-        // رابط سكريبت قوقل الجديد المحدث
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxg_jD8qYLIX5iHh4rbSURozU-wgyn2W649LDx4P6Q4hU4RWbaE4dxigfyI4eBvFxovIw/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
 
@@ -717,16 +705,13 @@
                 ticker.appendChild(tickerSpan);
             });
 
-            /* تكرار البطاقات مرتين لضمان استمرارية الحركة الأفقية بشكل دائم */
-            cachedNews.forEach(item => {
-                list.appendChild(createCardElement(item));
-            });
+            /* إضافة كروت الأخبار مرة واحدة فقط دون تكرار */
             cachedNews.forEach(item => {
                 list.appendChild(createCardElement(item));
             });
         }
 
-        /* دالة التمرير اليدوي بواسطة الأزرار مع الحفاظ على الأنميشن */
+        /* دالة التمرير اليدوي بواسطة أزرار التحكم في الصفحة الرئيسية */
         function scrollNewsList(direction) {
             const wrapper = document.getElementById('slider-wrapper');
             const scrollAmount = 345; // عرض البطاقة مع المسافة
