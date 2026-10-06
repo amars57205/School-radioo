@@ -528,8 +528,12 @@
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxg_jD8qYLIX5iHh4rbSURozU-wgyn2W649LDx4P6Q4hU4RWbaE4dxigfyI4eBvFxovIw/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
+        
+        // زمن التحديث التلقائي بالمللي ثانية (30000 = كل 30 ثانية)
+        const REFRESH_INTERVAL = 30000;
 
         let cachedNews = [];
+        let isInitialLoad = true;
 
         function sanitizeText(str) {
             if (!str) return '';
@@ -578,9 +582,13 @@
             }
         }
 
-        async function fetchNewsFromGoogleSheet() {
+        async function fetchNewsFromGoogleSheet(isSilent = false) {
             const list = document.getElementById('news-list');
-            list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات المباشرة...</div>';
+            
+            // إظهار نص التحميل فقط عند الفتح أول مرة
+            if (isInitialLoad && !isSilent) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات المباشرة...</div>';
+            }
 
             try {
                 const fetchUrl = APPS_SCRIPT_URL + '?t=' + new Date().getTime();
@@ -607,11 +615,18 @@
                     }
                 });
 
-                cachedNews = cleanList;
-                renderInterface();
+                // التحقق مما إذا كانت البيانات تختلف قبل إجراء عملية التحديث في DOM للحفاظ على أداء وسلاسة الصفحة
+                if (JSON.stringify(cleanList) !== JSON.stringify(cachedNews)) {
+                    cachedNews = cleanList;
+                    renderInterface();
+                }
+
+                isInitialLoad = false;
             } catch (err) {
                 console.error('Error fetching news:', err);
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار المباشرة.</div>';
+                if (isInitialLoad) {
+                    list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار المباشرة.</div>';
+                }
             }
         }
 
@@ -734,7 +749,18 @@
         });
         document.addEventListener('dragstart', event => event.preventDefault());
 
+        // التحميل الأولي للأخبار
         fetchNewsFromGoogleSheet();
+
+        // إيقاف وتفعيل التحديث الدوري التلقائي (كل 30 ثانية)
+        setInterval(() => {
+            fetchNewsFromGoogleSheet(true);
+        }, REFRESH_INTERVAL);
+
+        // إجراء تحديث صامت فوري عند العودة إلى التبويب
+        window.addEventListener('focus', () => {
+            fetchNewsFromGoogleSheet(true);
+        });
     </script>
 </body>
 </html>
