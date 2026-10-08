@@ -118,4 +118,911 @@
             text-decoration: none;
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
             transition: var(--transition);
-            animation:
+            animation: pulseBeat 1.5s infinite;
+            border: 2px solid #FCA5A5;
+        }
+
+        .daily-event-btn:hover {
+            transform: scale(1.06);
+            background: linear-gradient(135deg, #EF4444, #B91C1C);
+            box-shadow: 0 6px 18px rgba(220, 38, 38, 0.6);
+        }
+
+        .daily-event-btn i {
+            color: #FEF08A;
+            animation: heartHeart 1s infinite alternate;
+        }
+
+        @keyframes pulseBeat {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        @keyframes heartHeart {
+            from { transform: scale(1); }
+            to { transform: scale(1.25); }
+        }
+
+        .ticker-wrapper {
+            background: var(--card-bg);
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            height: 52px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .ticker-label {
+            background: var(--school-green);
+            color: white;
+            font-weight: 700;
+            padding: 0 clamp(10px, 3vw, 25px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            white-space: nowrap;
+        }
+
+        .ticker-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-track {
+            white-space: nowrap;
+            display: inline-block;
+            animation: ticker 35s linear infinite;
+        }
+
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin-left: 40px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--school-navy);
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .ticker-item:hover {
+            background: #FEF3C7;
+            color: var(--school-green);
+        }
+
+        .ticker-item::after {
+            content: "🎓";
+            margin-right: 40px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .main-container {
+            max-width: 100%;
+            margin: clamp(1rem, 2vw, 1.5rem) 0;
+            padding: 0;
+            flex: 1;
+            width: 100%;
+        }
+
+        .home-navigation-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0 20px 0;
+            padding: 0 20px;
+            flex-wrap: wrap;
+        }
+
+        .home-nav-btn {
+            background: var(--card-bg);
+            color: var(--school-navy);
+            border: 2px solid var(--school-navy);
+            padding: 9px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .home-nav-btn:hover {
+            background: var(--school-navy);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .home-nav-btn.archive-btn {
+            border-color: var(--school-gold);
+            color: #B45309;
+            background: #FFFBEB;
+        }
+
+        .home-nav-btn.archive-btn:hover {
+            background: var(--school-gold);
+            color: white;
+        }
+
+        .section-title-badge {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--school-navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .cards-slider-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            padding: 15px 0 35px 0;
+            position: relative;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        .cards-slider-wrapper::-webkit-scrollbar { display: none; }
+        .cards-slider-wrapper {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .news-list-track {
+            display: flex;
+            gap: 25px;
+            width: max-content;
+            padding: 0 20px;
+        }
+
+        .horizontal-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #EDF2F7;
+            position: relative;
+            width: 320px;
+            flex-shrink: 0;
+            cursor: pointer;
+            scroll-snap-align: center;
+        }
+
+        .horizontal-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(27, 54, 93, 0.15);
+            border-color: var(--school-gold);
+        }
+
+        .card-img-wrap {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            background-color: #e2e8f0;
+        }
+
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .horizontal-card:hover .card-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .card-category {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(27, 54, 93, 0.85);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-category.archived {
+            background: rgba(180, 83, 9, 0.85);
+        }
+
+        .card-content {
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--school-navy);
+            margin-bottom: 10px;
+            transition: color 0.2s ease;
+            word-break: break-word;
+        }
+
+        .horizontal-card:hover .card-title { color: var(--school-green); }
+
+        .card-excerpt {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            word-break: break-word;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px dashed #E2E8F0;
+            padding-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .read-more-btn {
+            color: var(--school-green);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: gap 0.2s ease;
+        }
+
+        .horizontal-card:hover .read-more-btn { gap: 8px; }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 25px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .archive-grid .horizontal-card {
+            width: 100%;
+        }
+
+        .events-archive-section {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #FFFFFF;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid #E2E8F0;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .event-archive-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            border-right: 4px solid var(--school-gold);
+            text-decoration: none;
+            color: var(--school-navy);
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .event-archive-item:hover {
+            background: #FEF3C7;
+            transform: translateX(-5px);
+        }
+
+        .article-page {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 0;
+            box-shadow: var(--shadow);
+            padding: clamp(20px, 4vw, 40px) clamp(15px, 5vw, 60px);
+            width: 100%;
+            min-height: 70vh;
+            border-top: 3px solid var(--school-navy);
+            border-bottom: 3px solid var(--school-navy);
+        }
+
+        .back-btn {
+            background: var(--bg-light);
+            color: var(--school-navy);
+            border: 1px solid #CBD5E1;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .back-btn:hover {
+            background: var(--school-navy);
+            color: white;
+            border-color: var(--school-navy);
+            transform: translateX(5px);
+        }
+
+        .article-title {
+            font-size: clamp(1.5rem, 4vw, 2.3rem);
+            font-weight: 800;
+            color: var(--school-navy);
+            margin-bottom: 15px;
+            line-height: 1.35;
+            word-break: break-word;
+        }
+
+        .article-meta {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 15px;
+        }
+
+        .article-img {
+            width: 100%;
+            max-height: 520px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            background-color: #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .article-text {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            line-height: 2.1;
+            color: #334155;
+            word-break: break-word;
+            white-space: pre-line;
+        }
+
+        footer {
+            background: var(--school-navy);
+            color: white;
+            margin-top: auto;
+            border-top: 5px solid var(--school-gold);
+        }
+
+        .footer-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rights-text {
+            font-size: 0.95rem;
+            color: #E2E8F0;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .home-nav-btn {
+                padding: 7px 14px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <header class="header">
+        <div class="header-center">
+            <div class="logo">
+                <i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية
+            </div>
+            <div class="school-subtitle">النافذة الإخبارية والأنشطة المدرسية الرسمية</div>
+            <div class="developer-badge">
+                <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
+            </div>
+            
+            <a href="https://sites.google.com/view/ammar-newsscience-dayoctober?usp=sharing" id="daily-event-link" target="_blank" class="daily-event-btn">
+                <i class="fa-solid fa-heart-pulse"></i> الحدث اليومي المميز
+            </a>
+        </div>
+    </header>
+
+    <div class="ticker-wrapper">
+        <div class="ticker-label"><i class="fa-solid fa-bullhorn"></i> أخبار الإذاعة المدرسية</div>
+        <div class="ticker-content">
+            <div class="ticker-track" id="ticker-track"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- الواجهة الرئيسية -->
+        <div id="home-view">
+            <div class="home-navigation-bar">
+                <button class="home-nav-btn" onclick="scrollNewsList('prev')">
+                    <i class="fa-solid fa-chevron-right"></i> السابق
+                </button>
+                <button class="home-nav-btn" onclick="scrollNewsList('next')">
+                    التالي <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="home-nav-btn archive-btn" onclick="showArchiveView()">
+                    <i class="fa-solid fa-box-archive"></i> أرشيف الأخبار والفعاليات
+                </button>
+            </div>
+
+            <div class="section-title-badge">
+                <i class="fa-solid fa-newspaper" style="color: var(--school-green);"></i> الأخبار الحديثة
+            </div>
+
+            <div class="cards-slider-wrapper" id="slider-wrapper">
+                <div class="news-list-track" id="news-list"></div>
+            </div>
+        </div>
+
+        <!-- واجهة الأرشيف -->
+        <div id="archive-view" style="display: none;">
+            <div class="home-navigation-bar">
+                <button class="home-nav-btn" onclick="showHome()">
+                    <i class="fa-solid fa-house"></i> العودة للرئيسية
+                </button>
+            </div>
+
+            <!-- قسم أرشيف الأحداث اليومية -->
+            <div class="events-archive-section">
+                <div class="section-title-badge">
+                    <i class="fa-solid fa-star" style="color: var(--school-gold);"></i> أرشيف الفعاليات والحدث اليومي
+                </div>
+                <div class="events-list" id="events-archive-list"></div>
+            </div>
+
+            <div class="section-title-badge" style="margin-top: 30px;">
+                <i class="fa-solid fa-box-archive" style="color: var(--school-gold);"></i> أرشيف الأخبار (الأقدم من 3 أيام)
+            </div>
+            <div class="archive-grid" id="archive-list"></div>
+        </div>
+
+        <!-- واجهة قراءة الخبر -->
+        <div id="article-view" class="article-page">
+            <button class="back-btn" onclick="goBackFromArticle()">
+                <i class="fa-solid fa-arrow-right"></i> العودة
+            </button>
+            
+            <h1 id="art-title" class="article-title" style="margin-top: 25px;"></h1>
+            
+            <div class="article-meta">
+                <span><i class="fa-regular fa-calendar"></i> <span id="art-date"></span></span>
+                <span><i class="fa-solid fa-radio"></i> إذاعة نبض الإخبارية</span>
+            </div>
+            
+            <img id="art-img" class="article-img" src="" alt="صورة الخبر" referrerpolicy="no-referrer">
+            
+            <div id="art-content" class="article-text"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p style="font-weight: 700; font-size: 1.1rem;">إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</p>
+            <p class="rights-text">جميع الحقوق محفوظة © مدرسة عمار بن ياسر الابتدائية</p>
+        </div>
+    </footer>
+
+    <script>
+        // ✅ رابط Apps Script (غيّره هنا فقط إذا تغيّر الرابط)
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx7O6uF6Js2IzKoJ3kXDTdcA3FIT8zON4i45EwpsxVWgWapMTo6kBnp9Zo8lZk8GfFK4Q/exec';
+        const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
+        const REFRESH_INTERVAL = 30000;
+
+        let cachedNews = [];
+        let activeNewsList = [];
+        let archivedNewsList = [];
+        let dynamicDailyEvents = [];
+        let isInitialLoad = true;
+        let previousView = 'home';
+
+        function sanitizeText(str) {
+            if (!str) return '';
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
+
+        function sanitizeURL(url) {
+            if (!url) return DEFAULT_FALLBACK_IMAGE;
+            let trimmed = String(url).trim();
+            let fileId = null;
+
+            if (trimmed.includes('drive.google.com')) {
+                const matchFile = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchFile && matchFile[1]) {
+                    fileId = matchFile[1];
+                } else {
+                    const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                    if (matchId && matchId[1]) fileId = matchId[1];
+                }
+            } else if (trimmed.includes('googleusercontent.com/d/')) {
+                const matchDirect = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchDirect && matchDirect[1]) fileId = matchDirect[1];
+            }
+
+            if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+            if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:image/')) return trimmed;
+
+            return DEFAULT_FALLBACK_IMAGE;
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function stopSpeaking() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function isOlderThanThreeDays(dateString) {
+            if (!dateString) return false;
+            const str = dateString.toString().trim();
+            if (str === 'اليوم' || str === 'أمس') return false;
+
+            const parsedDate = Date.parse(str);
+            if (isNaN(parsedDate)) return false;
+
+            const now = new Date().getTime();
+            const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+            return (now - parsedDate) > threeDaysInMs;
+        }
+
+        // ✅ يبحث عن العمود بجزء من اسمه (يتحمل اختلاف أسماء أعمدة نموذج جوجل)
+        function pick(item, keywords) {
+            for (const k of Object.keys(item)) {
+                const lower = k.toLowerCase();
+                if (keywords.some(w => lower.includes(w))) {
+                    const v = item[k];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+                }
+            }
+            return '';
+        }
+
+        async function fetchNewsFromGoogleSheet(isSilent = false) {
+            const list = document.getElementById('news-list');
+            
+            if (isInitialLoad && !isSilent) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات المباشرة...</div>';
+            }
+
+            try {
+                const fetchUrl = APPS_SCRIPT_URL + '?t=' + new Date().getTime();
+                const response = await fetch(fetchUrl, { cache: 'no-store' });
+                const rawData = await response.json();
+                
+                let listData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || []);
+
+                const cleanList = [];
+                const eventsArchive = [];
+
+                listData.forEach((item, index) => {
+                    let title = String(item.title || pick(item, ['عنوان', 'title']) || '').trim();
+                    let content = String(item.content || pick(item, ['محتوى', 'تفاصيل', 'نص', 'content']) || '').trim();
+                    let img = String(item.img || pick(item, ['صورة', 'img', 'image']) || '').trim();
+                    let date = item.date || pick(item, ['تاريخ', 'طابع', 'timestamp', 'date']) || 'اليوم';
+                    
+                    // استخراج رابط الحدث اليومي بكل المسميات
+                    let eventUrl = String(
+                        item.eventUrl ||
+                        item['رابط الحدث اليومي المميز'] || 
+                        item['رابط الحدث اليومي'] || 
+                        item['رابط الحدث'] || 
+                        item.event_url || 
+                        pick(item, ['حدث', 'event']) ||
+                        ''
+                    ).trim();
+
+                    // رابط الحدث اليومي يُحفظ حتى لو لم يكن للصف عنوان خبر
+                    if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
+                        eventsArchive.push({
+                            title: title || 'الحدث اليومي المميز',
+                            url: eventUrl
+                        });
+                    }
+
+                    if (title !== "" && title !== "undefined") {
+                        cleanList.push({
+                            id: item.id || index,
+                            title: title,
+                            content: content,
+                            img: img || DEFAULT_FALLBACK_IMAGE,
+                            date: date,
+                            eventUrl: eventUrl
+                        });
+                    }
+                });
+
+                // ✅ الرسم دائماً في أول تحميل حتى لو كانت القائمة فارغة
+                if (isInitialLoad || JSON.stringify(cleanList) !== JSON.stringify(cachedNews)) {
+                    cachedNews = cleanList;
+                    dynamicDailyEvents = eventsArchive;
+                    
+                    activeNewsList = [];
+                    archivedNewsList = [];
+
+                    cachedNews.forEach(item => {
+                        if (isOlderThanThreeDays(item.date)) {
+                            archivedNewsList.push(item);
+                        } else {
+                            activeNewsList.push(item);
+                        }
+                    });
+
+                    updateDailyEventButton();
+                    renderInterface();
+                }
+
+                isInitialLoad = false;
+            } catch (err) {
+                console.error('Error fetching news:', err);
+                if (isInitialLoad) {
+                    list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار المباشرة.</div>';
+                }
+            }
+        }
+
+        function updateDailyEventButton() {
+            const eventBtn = document.getElementById('daily-event-link');
+            if (dynamicDailyEvents.length > 0) {
+                // البيانات مرتبة من الأحدث للأقدم، فالحدث الأحدث هو الأول
+                const latestEvent = dynamicDailyEvents[0];
+                eventBtn.href = latestEvent.url;
+                eventBtn.title = latestEvent.title;
+            }
+        }
+
+        function renderEventsArchive() {
+            const eventsContainer = document.getElementById('events-archive-list');
+            eventsContainer.innerHTML = '';
+
+            if (dynamicDailyEvents.length === 0) {
+                eventsContainer.innerHTML = '<div style="text-align:center; color: var(--text-muted);">لا توجد فعاليات مضافة عبر النموذج حالياً.</div>';
+                return;
+            }
+
+            dynamicDailyEvents.forEach((ev, idx) => {
+                const item = document.createElement('a');
+                item.className = 'event-archive-item';
+                item.href = ev.url;
+                item.target = '_blank';
+                item.innerHTML = `
+                    <span><i class="fa-solid fa-link"></i> ${sanitizeText(ev.title)}</span>
+                    <span style="font-size:0.85rem; color:${idx === 0 ? 'var(--school-green)' : 'var(--text-muted)'};">
+                        ${idx === 0 ? '● الحدث الحالي' : 'مؤرشف'}
+                    </span>
+                `;
+                eventsContainer.appendChild(item);
+            });
+        }
+
+        function createCardElement(item, isArchived = false) {
+            const cleanTitle = sanitizeText(item.title);
+            const cleanImg = sanitizeURL(item.img);
+            const cleanContent = sanitizeText(item.content);
+            const cleanDate = sanitizeText(item.date || 'اليوم');
+            const excerpt = cleanContent.length > 90 ? cleanContent.substring(0, 90) + '...' : cleanContent;
+
+            const card = document.createElement('div');
+            card.className = 'horizontal-card';
+
+            card.innerHTML = `
+                <div class="card-img-wrap">
+                    <span class="card-category ${isArchived ? 'archived' : ''}">${isArchived ? 'أرشيف' : 'نشاط مدرسي'}</span>
+                    <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h3 class="card-title">${cleanTitle}</h3>
+                        <p class="card-excerpt">${excerpt}</p>
+                    </div>
+                    <div class="card-footer">
+                        <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
+                        <span class="read-more-btn">
+                            قراءة الخبر <i class="fa-solid fa-arrow-left"></i>
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', () => openArticle(item.id));
+
+            return card;
+        }
+
+        function renderInterface() {
+            const list = document.getElementById('news-list');
+            const archiveList = document.getElementById('archive-list');
+            const ticker = document.getElementById('ticker-track');
+            
+            list.innerHTML = '';
+            archiveList.innerHTML = '';
+            ticker.innerHTML = '';
+
+            renderEventsArchive();
+
+            if (cachedNews.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
+                ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
+                return;
+            }
+
+            cachedNews.forEach(item => {
+                const cleanTitle = sanitizeText(item.title);
+                const tickerSpan = document.createElement('span');
+                tickerSpan.className = 'ticker-item';
+                tickerSpan.textContent = cleanTitle;
+                
+                tickerSpan.addEventListener('mouseenter', () => speakText(cleanTitle));
+                tickerSpan.addEventListener('mouseleave', () => stopSpeaking());
+                tickerSpan.addEventListener('click', () => openArticle(item.id));
+                ticker.appendChild(tickerSpan);
+            });
+
+            if (activeNewsList.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">جميع الأخبار الحالية منقولة للأرشيف.</div>';
+            } else {
+                activeNewsList.forEach(item => {
+                    list.appendChild(createCardElement(item, false));
+                });
+            }
+
+            if (archivedNewsList.length === 0) {
+                archiveList.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار مؤرشفة حالياً.</div>';
+            } else {
+                archivedNewsList.forEach(item => {
+                    archiveList.appendChild(createCardElement(item, true));
+                });
+            }
+        }
+
+        function scrollNewsList(direction) {
+            const wrapper = document.getElementById('slider-wrapper');
+            const scrollAmount = 345;
+            
+            if (direction === 'next') {
+                wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        function showHome() {
+            stopSpeaking();
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'block';
+            previousView = 'home';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showArchiveView() {
+            stopSpeaking();
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'block';
+            previousView = 'archive';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBackFromArticle() {
+            if (previousView === 'archive') {
+                showArchiveView();
+            } else {
+                showHome();
+            }
+        }
+
+        function openArticle(id) {
+            stopSpeaking();
+            const article = cachedNews.find(n => n.id === id);
+            
+            if (article) {
+                const artImg = document.getElementById('art-img');
+                document.getElementById('art-title').textContent = article.title;
+                artImg.src = sanitizeURL(article.img);
+                artImg.onerror = function() {
+                    this.onerror = null;
+                    this.src = DEFAULT_FALLBACK_IMAGE;
+                };
+                document.getElementById('art-content').textContent = article.content;
+                document.getElementById('art-date').textContent = article.date || 'غير محدد';
+
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('archive-view').style.display = 'none';
+                document.getElementById('article-view').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (e) {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's' || e.key === 'A' || e.key === 'a' || e.key === 'P' || e.key === 'p'))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        document.addEventListener('dragstart', event => event.preventDefault());
+
+        fetchNewsFromGoogleSheet();
+
+        setInterval(() => {
+            fetchNewsFromGoogleSheet(true);
+        }, REFRESH_INTERVAL);
+
+        window.addEventListener('focus', () => {
+            fetchNewsFromGoogleSheet(true);
+        });
+    </script>
+</body>
+</html>
