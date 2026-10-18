@@ -760,6 +760,8 @@
 
                 const cleanList = [];
                 const eventsArchive = [];
+                const seenNews = new Set();   // ✅ لمنع تكرار الخبر نفسه
+                const seenEvents = new Set(); // ✅ لمنع تكرار رابط الحدث نفسه
 
                 listData.forEach((item, index) => {
                     let title = String(item.title || pick(item, ['عنوان', 'title']) || '').trim();
@@ -780,13 +782,21 @@
 
                     // رابط الحدث اليومي يُحفظ حتى لو لم يكن للصف عنوان خبر
                     if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
-                        eventsArchive.push({
-                            title: title || 'الحدث اليومي المميز',
-                            url: eventUrl
-                        });
+                        if (!seenEvents.has(eventUrl)) {
+                            seenEvents.add(eventUrl);
+                            eventsArchive.push({
+                                title: title || 'الحدث اليومي المميز',
+                                url: eventUrl
+                            });
+                        }
                     }
 
                     if (title !== "" && title !== "undefined") {
+                        // ✅ تجاهل الخبر إذا كان مكرراً (نفس العنوان والمحتوى)
+                        const newsKey = title + '||' + content;
+                        if (seenNews.has(newsKey)) return;
+                        seenNews.add(newsKey);
+
                         cleanList.push({
                             id: item.id || index,
                             title: title,
@@ -1013,6 +1023,59 @@
             }
         });
         document.addEventListener('dragstart', event => event.preventDefault());
+
+        // ✅ حركة تلقائية للبطاقات (بدون نسخ أو تكرار)
+        // تتحرك حتى آخر بطاقة، تتوقف قليلاً، ثم ترجع لأول بطاقة. وتتوقف عند وضع الماوس.
+        (function autoMoveCards() {
+            const wrapper = document.getElementById('slider-wrapper');
+            const SPEED = 40;        // بكسل في الثانية
+            const END_PAUSE = 2500;  // مدة التوقف عند آخر بطاقة (بالمللي ثانية)
+            let paused = false, pos = null, last = null, resumeTimer = null;
+            let atEnd = false, waitUntil = 0;
+
+            wrapper.style.scrollSnapType = 'none';
+            wrapper.style.scrollBehavior = 'auto';
+
+            wrapper.addEventListener('mouseover', e => { if (e.target.closest('.horizontal-card')) paused = true; });
+            wrapper.addEventListener('mouseout', e => {
+                if (e.target.closest('.horizontal-card') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.horizontal-card'))) paused = false;
+            });
+            wrapper.addEventListener('touchstart', () => { paused = true; clearTimeout(resumeTimer); }, { passive: true });
+            wrapper.addEventListener('touchend', () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { paused = false; }, 2000); }, { passive: true });
+
+            function step(t) {
+                if (last === null) last = t;
+                const dt = Math.min((t - last) / 1000, 0.1);
+                last = t;
+
+                const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+                const homeVisible = document.getElementById('home-view').style.display !== 'none';
+
+                if (!paused && homeVisible && maxScroll > 5) {
+                    if (atEnd) {
+                        // بعد انتهاء التوقف نرجع لأول بطاقة
+                        if (t >= waitUntil) {
+                            atEnd = false;
+                            pos = 0;
+                            wrapper.scrollLeft = 0;
+                        }
+                    } else {
+                        if (pos === null || Math.abs(pos - wrapper.scrollLeft) > 3) pos = wrapper.scrollLeft;
+                        pos -= SPEED * dt; // في الصفحات RTL: النقصان = الانتقال للبطاقات التالية
+                        if (pos <= -maxScroll) {
+                            pos = -maxScroll;
+                            atEnd = true;
+                            waitUntil = t + END_PAUSE;
+                        }
+                        wrapper.scrollLeft = pos;
+                    }
+                } else {
+                    pos = null;
+                }
+                requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        })();
 
         fetchNewsFromGoogleSheet();
 
