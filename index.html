@@ -554,21 +554,6 @@
             font-weight: 600;
         }
 
-        .diag-box {
-            max-width: 640px;
-            margin: 20px auto;
-            padding: 18px 22px;
-            background: #FEF2F2;
-            border: 1px solid #FCA5A5;
-            border-radius: 12px;
-            color: #991B1B;
-            font-weight: 600;
-            line-height: 1.9;
-            text-align: right;
-            user-select: text;
-            -webkit-user-select: text;
-        }
-
         @media (max-width: 480px) {
             .home-nav-btn {
                 padding: 7px 14px;
@@ -734,48 +719,17 @@
             }
         }
 
-        // ✅ قارئ تاريخ مرن: يدعم ISO و 19/10/2026 (يوم/شهر/سنة) والأرقام العربية و ص/م
-        function parseDate(value) {
-            if (value === undefined || value === null) return null;
-            let s = String(value).trim();
-            if (!s) return null;
-            s = s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
-            if (s === 'اليوم') return Date.now();
-            if (s === 'أمس') return Date.now() - 24 * 60 * 60 * 1000;
-
-            const m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(ص|م|AM|PM|am|pm)?)?/);
-            if (m) {
-                let h = parseInt(m[4] || '0', 10);
-                const ap = m[7];
-                if (ap) {
-                    if (/م|pm/i.test(ap) && h < 12) h += 12;
-                    if (/ص|am/i.test(ap) && h === 12) h = 0;
-                }
-                return new Date(+m[3], +m[2] - 1, +m[1], h, parseInt(m[5] || '0', 10), parseInt(m[6] || '0', 10)).getTime();
-            }
-
-            const t = Date.parse(s);
-            return isNaN(t) ? null : t;
-        }
-
-        // ✅ عرض التاريخ بشكل مقروء
-        function formatDateDisplay(value) {
-            const t = parseDate(value);
-            const raw = String(value || '').trim();
-            if (raw === 'اليوم' || raw === 'أمس') return raw;
-            if (t === null) return raw || 'اليوم';
-            try {
-                return new Date(t).toLocaleDateString('ar-SA-u-ca-gregory', { year: 'numeric', month: 'long', day: 'numeric' });
-            } catch (e) {
-                return new Date(t).toLocaleDateString();
-            }
-        }
-
         function isOlderThanThreeDays(dateString) {
-            const t = parseDate(dateString);
-            if (t === null) return false;
+            if (!dateString) return false;
+            const str = dateString.toString().trim();
+            if (str === 'اليوم' || str === 'أمس') return false;
+
+            const parsedDate = Date.parse(str);
+            if (isNaN(parsedDate)) return false;
+
+            const now = new Date().getTime();
             const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
-            return (Date.now() - t) > threeDaysInMs;
+            return (now - parsedDate) > threeDaysInMs;
         }
 
         // ✅ يبحث عن العمود بجزء من اسمه (يتحمل اختلاف أسماء أعمدة نموذج جوجل)
@@ -790,11 +744,6 @@
             return '';
         }
 
-        function showDiagnostic(html) {
-            const list = document.getElementById('news-list');
-            list.innerHTML = '<div class="diag-box">' + html + '</div>';
-        }
-
         async function fetchNewsFromGoogleSheet(isSilent = false) {
             const list = document.getElementById('news-list');
             
@@ -803,12 +752,11 @@
             }
 
             try {
-                const fetchUrl = APPS_SCRIPT_URL + (APPS_SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+                const fetchUrl = APPS_SCRIPT_URL + '?t=' + new Date().getTime();
                 const response = await fetch(fetchUrl, { cache: 'no-store' });
                 const rawData = await response.json();
                 
-                let listData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || rawData.rows || []);
-                if (!Array.isArray(listData)) listData = [];
+                let listData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || []);
 
                 const cleanList = [];
                 const eventsArchive = [];
@@ -816,9 +764,7 @@
                 const seenEvents = new Set(); // ✅ لمنع تكرار رابط الحدث نفسه
 
                 listData.forEach((item, index) => {
-                    if (!item || typeof item !== 'object') return;
-
-                    let title = String(item.title || pick(item, ['عنوان', 'title', 'اسم الخبر', 'الخبر']) || '').trim();
+                    let title = String(item.title || pick(item, ['عنوان', 'title']) || '').trim();
                     let content = String(item.content || pick(item, ['محتوى', 'تفاصيل', 'نص', 'content']) || '').trim();
                     let img = String(item.img || pick(item, ['صورة', 'img', 'image']) || '').trim();
                     let date = item.date || pick(item, ['تاريخ', 'طابع', 'timestamp', 'date']) || 'اليوم';
@@ -828,4 +774,318 @@
                         item.eventUrl ||
                         item['رابط الحدث اليومي المميز'] || 
                         item['رابط الحدث اليومي'] || 
-                        item['رابط الحدث'] ||
+                        item['رابط الحدث'] || 
+                        item.event_url || 
+                        pick(item, ['حدث', 'event']) ||
+                        ''
+                    ).trim();
+
+                    // رابط الحدث اليومي يُحفظ حتى لو لم يكن للصف عنوان خبر
+                    if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
+                        if (!seenEvents.has(eventUrl)) {
+                            seenEvents.add(eventUrl);
+                            eventsArchive.push({
+                                title: title || 'الحدث اليومي المميز',
+                                url: eventUrl
+                            });
+                        }
+                    }
+
+                    if (title !== "" && title !== "undefined") {
+                        // ✅ تجاهل الخبر إذا كان مكرراً (نفس العنوان والمحتوى)
+                        const newsKey = title + '||' + content;
+                        if (seenNews.has(newsKey)) return;
+                        seenNews.add(newsKey);
+
+                        cleanList.push({
+                            id: item.id || index,
+                            title: title,
+                            content: content,
+                            img: img || DEFAULT_FALLBACK_IMAGE,
+                            date: date,
+                            eventUrl: eventUrl
+                        });
+                    }
+                });
+
+                // ✅ الرسم دائماً في أول تحميل حتى لو كانت القائمة فارغة
+                if (isInitialLoad || JSON.stringify(cleanList) !== JSON.stringify(cachedNews)) {
+                    cachedNews = cleanList;
+                    dynamicDailyEvents = eventsArchive;
+                    
+                    activeNewsList = [];
+                    archivedNewsList = [];
+
+                    cachedNews.forEach(item => {
+                        if (isOlderThanThreeDays(item.date)) {
+                            archivedNewsList.push(item);
+                        } else {
+                            activeNewsList.push(item);
+                        }
+                    });
+
+                    updateDailyEventButton();
+                    renderInterface();
+                }
+
+                isInitialLoad = false;
+            } catch (err) {
+                console.error('Error fetching news:', err);
+                if (isInitialLoad) {
+                    list.innerHTML = '<div style="text-align:center; padding: 40px; color: red; font-weight:700;">تعذر تحميل الأخبار المباشرة.</div>';
+                }
+            }
+        }
+
+        function updateDailyEventButton() {
+            const eventBtn = document.getElementById('daily-event-link');
+            if (dynamicDailyEvents.length > 0) {
+                // البيانات مرتبة من الأحدث للأقدم، فالحدث الأحدث هو الأول
+                const latestEvent = dynamicDailyEvents[0];
+                eventBtn.href = latestEvent.url;
+                eventBtn.title = latestEvent.title;
+            }
+        }
+
+        function renderEventsArchive() {
+            const eventsContainer = document.getElementById('events-archive-list');
+            eventsContainer.innerHTML = '';
+
+            if (dynamicDailyEvents.length === 0) {
+                eventsContainer.innerHTML = '<div style="text-align:center; color: var(--text-muted);">لا توجد فعاليات مضافة عبر النموذج حالياً.</div>';
+                return;
+            }
+
+            dynamicDailyEvents.forEach((ev, idx) => {
+                const item = document.createElement('a');
+                item.className = 'event-archive-item';
+                item.href = ev.url;
+                item.target = '_blank';
+                item.innerHTML = `
+                    <span><i class="fa-solid fa-link"></i> ${sanitizeText(ev.title)}</span>
+                    <span style="font-size:0.85rem; color:${idx === 0 ? 'var(--school-green)' : 'var(--text-muted)'};">
+                        ${idx === 0 ? '● الحدث الحالي' : 'مؤرشف'}
+                    </span>
+                `;
+                eventsContainer.appendChild(item);
+            });
+        }
+
+        function createCardElement(item, isArchived = false) {
+            const cleanTitle = sanitizeText(item.title);
+            const cleanImg = sanitizeURL(item.img);
+            const cleanContent = sanitizeText(item.content);
+            const cleanDate = sanitizeText(item.date || 'اليوم');
+            const excerpt = cleanContent.length > 90 ? cleanContent.substring(0, 90) + '...' : cleanContent;
+
+            const card = document.createElement('div');
+            card.className = 'horizontal-card';
+
+            card.innerHTML = `
+                <div class="card-img-wrap">
+                    <span class="card-category ${isArchived ? 'archived' : ''}">${isArchived ? 'أرشيف' : 'نشاط مدرسي'}</span>
+                    <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <h3 class="card-title">${cleanTitle}</h3>
+                        <p class="card-excerpt">${excerpt}</p>
+                    </div>
+                    <div class="card-footer">
+                        <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
+                        <span class="read-more-btn">
+                            قراءة الخبر <i class="fa-solid fa-arrow-left"></i>
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', () => openArticle(item.id));
+
+            return card;
+        }
+
+        function renderInterface() {
+            const list = document.getElementById('news-list');
+            const archiveList = document.getElementById('archive-list');
+            const ticker = document.getElementById('ticker-track');
+            
+            list.innerHTML = '';
+            archiveList.innerHTML = '';
+            ticker.innerHTML = '';
+
+            renderEventsArchive();
+
+            if (cachedNews.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
+                ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
+                return;
+            }
+
+            cachedNews.forEach(item => {
+                const cleanTitle = sanitizeText(item.title);
+                const tickerSpan = document.createElement('span');
+                tickerSpan.className = 'ticker-item';
+                tickerSpan.textContent = cleanTitle;
+                
+                tickerSpan.addEventListener('mouseenter', () => speakText(cleanTitle));
+                tickerSpan.addEventListener('mouseleave', () => stopSpeaking());
+                tickerSpan.addEventListener('click', () => openArticle(item.id));
+                ticker.appendChild(tickerSpan);
+            });
+
+            if (activeNewsList.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">جميع الأخبار الحالية منقولة للأرشيف.</div>';
+            } else {
+                activeNewsList.forEach(item => {
+                    list.appendChild(createCardElement(item, false));
+                });
+            }
+
+            if (archivedNewsList.length === 0) {
+                archiveList.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار مؤرشفة حالياً.</div>';
+            } else {
+                archivedNewsList.forEach(item => {
+                    archiveList.appendChild(createCardElement(item, true));
+                });
+            }
+        }
+
+        function scrollNewsList(direction) {
+            const wrapper = document.getElementById('slider-wrapper');
+            const scrollAmount = 345;
+            
+            if (direction === 'next') {
+                wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        function showHome() {
+            stopSpeaking();
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'block';
+            previousView = 'home';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showArchiveView() {
+            stopSpeaking();
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'block';
+            previousView = 'archive';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBackFromArticle() {
+            if (previousView === 'archive') {
+                showArchiveView();
+            } else {
+                showHome();
+            }
+        }
+
+        function openArticle(id) {
+            stopSpeaking();
+            const article = cachedNews.find(n => n.id === id);
+            
+            if (article) {
+                const artImg = document.getElementById('art-img');
+                document.getElementById('art-title').textContent = article.title;
+                artImg.src = sanitizeURL(article.img);
+                artImg.onerror = function() {
+                    this.onerror = null;
+                    this.src = DEFAULT_FALLBACK_IMAGE;
+                };
+                document.getElementById('art-content').textContent = article.content;
+                document.getElementById('art-date').textContent = article.date || 'غير محدد';
+
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('archive-view').style.display = 'none';
+                document.getElementById('article-view').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (e) {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's' || e.key === 'A' || e.key === 'a' || e.key === 'P' || e.key === 'p'))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        document.addEventListener('dragstart', event => event.preventDefault());
+
+        // ✅ حركة تلقائية للبطاقات (بدون نسخ أو تكرار)
+        // تتحرك حتى آخر بطاقة، تتوقف قليلاً، ثم ترجع لأول بطاقة. وتتوقف عند وضع الماوس.
+        (function autoMoveCards() {
+            const wrapper = document.getElementById('slider-wrapper');
+            const SPEED = 40;        // بكسل في الثانية
+            const END_PAUSE = 2500;  // مدة التوقف عند آخر بطاقة (بالمللي ثانية)
+            let paused = false, pos = null, last = null, resumeTimer = null;
+            let atEnd = false, waitUntil = 0;
+
+            wrapper.style.scrollSnapType = 'none';
+            wrapper.style.scrollBehavior = 'auto';
+
+            wrapper.addEventListener('mouseover', e => { if (e.target.closest('.horizontal-card')) paused = true; });
+            wrapper.addEventListener('mouseout', e => {
+                if (e.target.closest('.horizontal-card') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.horizontal-card'))) paused = false;
+            });
+            wrapper.addEventListener('touchstart', () => { paused = true; clearTimeout(resumeTimer); }, { passive: true });
+            wrapper.addEventListener('touchend', () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { paused = false; }, 2000); }, { passive: true });
+
+            function step(t) {
+                if (last === null) last = t;
+                const dt = Math.min((t - last) / 1000, 0.1);
+                last = t;
+
+                const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+                const homeVisible = document.getElementById('home-view').style.display !== 'none';
+
+                if (!paused && homeVisible && maxScroll > 5) {
+                    if (atEnd) {
+                        // بعد انتهاء التوقف نرجع لأول بطاقة
+                        if (t >= waitUntil) {
+                            atEnd = false;
+                            pos = 0;
+                            wrapper.scrollLeft = 0;
+                        }
+                    } else {
+                        if (pos === null || Math.abs(pos - wrapper.scrollLeft) > 3) pos = wrapper.scrollLeft;
+                        pos -= SPEED * dt; // في الصفحات RTL: النقصان = الانتقال للبطاقات التالية
+                        if (pos <= -maxScroll) {
+                            pos = -maxScroll;
+                            atEnd = true;
+                            waitUntil = t + END_PAUSE;
+                        }
+                        wrapper.scrollLeft = pos;
+                    }
+                } else {
+                    pos = null;
+                }
+                requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        })();
+
+        fetchNewsFromGoogleSheet();
+
+        setInterval(() => {
+            fetchNewsFromGoogleSheet(true);
+        }, REFRESH_INTERVAL);
+
+        window.addEventListener('focus', () => {
+            fetchNewsFromGoogleSheet(true);
+        });
+    </script>
+</body>
+</html>
