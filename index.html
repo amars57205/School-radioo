@@ -703,6 +703,30 @@
             return DEFAULT_FALLBACK_IMAGE;
         }
 
+        // ✅ صورة احتياطية مضمّنة في الكود لا يمكن أن تفشل
+        const INLINE_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="100%" height="100%" fill="#E2E8F0"/><text x="50%" y="50%" font-size="28" fill="#64748B" text-anchor="middle" font-family="Arial">إذاعة نبض الإخبارية</text></svg>'
+        );
+
+        // ✅ استخراج معرّف ملف درايف من رابط الصورة
+        function getFileId(url) {
+            const m = String(url || '').match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+            return m ? m[1] : '';
+        }
+
+        // ✅ سلسلة بدائل عند فشل الصورة: الرابط الأصلي ← صورة مصغّرة من درايف ← صورة مضمّنة
+        function handleImgError(img) {
+            const step = parseInt(img.dataset.step || '0', 10);
+            const fid = img.dataset.fid;
+            img.dataset.step = step + 1;
+            if (fid && step === 0) {
+                img.src = 'https://drive.google.com/thumbnail?id=' + fid + '&sz=w800';
+            } else {
+                img.onerror = null;
+                img.src = INLINE_PLACEHOLDER;
+            }
+        }
+
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -884,7 +908,7 @@
             card.innerHTML = `
                 <div class="card-img-wrap">
                     <span class="card-category ${isArchived ? 'archived' : ''}">${isArchived ? 'أرشيف' : 'نشاط مدرسي'}</span>
-                    <img src="${cleanImg}" alt="${cleanTitle}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${DEFAULT_FALLBACK_IMAGE}';">
+                    <img src="${cleanImg}" data-fid="${getFileId(cleanImg)}" alt="${cleanTitle}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="handleImgError(this)">
                 </div>
                 <div class="card-content">
                     <div>
@@ -994,12 +1018,12 @@
             
             if (article) {
                 const artImg = document.getElementById('art-img');
+                const artSrc = sanitizeURL(article.img);
                 document.getElementById('art-title').textContent = article.title;
-                artImg.src = sanitizeURL(article.img);
-                artImg.onerror = function() {
-                    this.onerror = null;
-                    this.src = DEFAULT_FALLBACK_IMAGE;
-                };
+                artImg.dataset.step = '0';
+                artImg.dataset.fid = getFileId(artSrc);
+                artImg.onerror = function () { handleImgError(this); };
+                artImg.src = artSrc;
                 document.getElementById('art-content').textContent = article.content;
                 document.getElementById('art-date').textContent = article.date || 'غير محدد';
 
