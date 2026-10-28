@@ -530,6 +530,37 @@
             white-space: pre-line;
         }
 
+        /* زر الرابط المرفق التفاعلي داخل الخبر */
+        .article-link-container {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #E2E8F0;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .article-ext-btn {
+            background: linear-gradient(135deg, var(--school-green), #1b5e20);
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 6px 18px rgba(46, 125, 50, 0.25);
+            transition: var(--transition);
+            border: 2px solid #81C784;
+        }
+
+        .article-ext-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(46, 125, 50, 0.4);
+            background: linear-gradient(135deg, #388E3C, #2E7D32);
+        }
+
         footer {
             background: var(--school-navy);
             color: white;
@@ -558,6 +589,10 @@
             .home-nav-btn {
                 padding: 7px 14px;
                 font-size: 0.8rem;
+            }
+            .article-ext-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -649,6 +684,13 @@
             <img id="art-img" class="article-img" src="" alt="صورة الخبر" referrerpolicy="no-referrer">
             
             <div id="art-content" class="article-text"></div>
+
+            <!-- حقل زر الرابط المرفق الخاص بالخبر -->
+            <div id="art-link-wrap" class="article-link-container" style="display: none;">
+                <a id="art-external-link" href="#" target="_blank" rel="noopener noreferrer" class="article-ext-btn">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> فتح الرابط المرفق بالخبر
+                </a>
+            </div>
         </div>
     </div>
 
@@ -660,7 +702,7 @@
     </footer>
 
     <script>
-        // ✅ رابط Apps Script (غيّره هنا فقط إذا تغيّر الرابط)
+        // ✅ رابط Apps Script
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx7O6uF6Js2IzKoJ3kXDTdcA3FIT8zON4i45EwpsxVWgWapMTo6kBnp9Zo8lZk8GfFK4Q/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
         const REFRESH_INTERVAL = 30000;
@@ -703,18 +745,15 @@
             return DEFAULT_FALLBACK_IMAGE;
         }
 
-        // ✅ صورة احتياطية مضمّنة في الكود لا يمكن أن تفشل
         const INLINE_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
             '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400"><rect width="100%" height="100%" fill="#E2E8F0"/><text x="50%" y="50%" font-size="28" fill="#64748B" text-anchor="middle" font-family="Arial">إذاعة نبض الإخبارية</text></svg>'
         );
 
-        // ✅ استخراج معرّف ملف درايف من رابط الصورة
         function getFileId(url) {
             const m = String(url || '').match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
             return m ? m[1] : '';
         }
 
-        // ✅ سلسلة بدائل عند فشل الصورة: الرابط الأصلي ← صورة مصغّرة من درايف ← صورة مضمّنة
         function handleImgError(img) {
             const step = parseInt(img.dataset.step || '0', 10);
             const fid = img.dataset.fid;
@@ -756,7 +795,6 @@
             return (now - parsedDate) > threeDaysInMs;
         }
 
-        // ✅ يبحث عن العمود بجزء من اسمه (يتحمل اختلاف أسماء أعمدة نموذج جوجل)
         function pick(item, keywords) {
             for (const k of Object.keys(item)) {
                 const lower = k.toLowerCase();
@@ -784,8 +822,8 @@
 
                 const cleanList = [];
                 const eventsArchive = [];
-                const seenNews = new Set();   // ✅ لمنع تكرار الخبر نفسه
-                const seenEvents = new Set(); // ✅ لمنع تكرار رابط الحدث نفسه
+                const seenNews = new Set();
+                const seenEvents = new Set();
 
                 listData.forEach((item, index) => {
                     let title = String(item.title || pick(item, ['عنوان', 'title']) || '').trim();
@@ -793,7 +831,20 @@
                     let img = String(item.img || pick(item, ['صورة', 'img', 'image']) || '').trim();
                     let date = item.date || pick(item, ['تاريخ', 'طابع', 'timestamp', 'date']) || 'اليوم';
                     
-                    // استخراج رابط الحدث اليومي بكل المسميات
+                    // استخراج الرابط المرفق الخاص بالخبر (مثل رابط صفحة أخرى، ملف PDF، نموذج، الخ)
+                    let articleLink = String(
+                        item.articleLink ||
+                        item.link ||
+                        item.url ||
+                        item['رابط إضافي'] ||
+                        item['الرابط المرفق'] ||
+                        item['رابط الخبر'] ||
+                        item['رابط'] ||
+                        pick(item, ['رابط إضافي', 'رابط مرفق', 'رابط الخبر', 'link', 'url']) ||
+                        ''
+                    ).trim();
+
+                    // استخراج رابط الحدث اليومي المميز
                     let eventUrl = String(
                         item.eventUrl ||
                         item['رابط الحدث اليومي المميز'] || 
@@ -804,7 +855,6 @@
                         ''
                     ).trim();
 
-                    // رابط الحدث اليومي يُحفظ حتى لو لم يكن للصف عنوان خبر
                     if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
                         if (!seenEvents.has(eventUrl)) {
                             seenEvents.add(eventUrl);
@@ -816,7 +866,6 @@
                     }
 
                     if (title !== "" && title !== "undefined") {
-                        // ✅ تجاهل الخبر إذا كان مكرراً (نفس العنوان والمحتوى)
                         const newsKey = title + '||' + content;
                         if (seenNews.has(newsKey)) return;
                         seenNews.add(newsKey);
@@ -827,12 +876,12 @@
                             content: content,
                             img: img || DEFAULT_FALLBACK_IMAGE,
                             date: date,
+                            articleLink: articleLink,
                             eventUrl: eventUrl
                         });
                     }
                 });
 
-                // ✅ الرسم دائماً في أول تحميل حتى لو كانت القائمة فارغة
                 if (isInitialLoad || JSON.stringify(cleanList) !== JSON.stringify(cachedNews)) {
                     cachedNews = cleanList;
                     dynamicDailyEvents = eventsArchive;
@@ -864,7 +913,6 @@
         function updateDailyEventButton() {
             const eventBtn = document.getElementById('daily-event-link');
             if (dynamicDailyEvents.length > 0) {
-                // البيانات مرتبة من الأحدث للأقدم، فالحدث الأحدث هو الأول
                 const latestEvent = dynamicDailyEvents[0];
                 eventBtn.href = latestEvent.url;
                 eventBtn.title = latestEvent.title;
@@ -916,200 +964,135 @@
                         <p class="card-excerpt">${excerpt}</p>
                     </div>
                     <div class="card-footer">
-                        <span><i class="fa-regular fa-clock"></i> ${cleanDate}</span>
-                        <span class="read-more-btn">
-                            قراءة الخبر <i class="fa-solid fa-arrow-left"></i>
-                        </span>
+                        <span><i class="fa-regular fa-calendar-days"></i> ${cleanDate}</span>
+                        <span class="read-more-btn">التفاصيل <i class="fa-solid fa-arrow-left"></i></span>
                     </div>
                 </div>
             `;
 
-            card.addEventListener('click', () => openArticle(item.id));
-
+            card.onclick = () => openArticle(item);
             return card;
         }
 
         function renderInterface() {
-            const list = document.getElementById('news-list');
-            const archiveList = document.getElementById('archive-list');
-            const ticker = document.getElementById('ticker-track');
-            
-            list.innerHTML = '';
-            archiveList.innerHTML = '';
-            ticker.innerHTML = '';
+            const newsListEl = document.getElementById('news-list');
+            const archiveListEl = document.getElementById('archive-list');
+            const tickerTrack = document.getElementById('ticker-track');
 
-            renderEventsArchive();
-
-            if (cachedNews.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار منشورة حالياً.</div>';
-                ticker.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
-                return;
-            }
-
-            cachedNews.forEach(item => {
-                const cleanTitle = sanitizeText(item.title);
-                const tickerSpan = document.createElement('span');
-                tickerSpan.className = 'ticker-item';
-                tickerSpan.textContent = cleanTitle;
-                
-                tickerSpan.addEventListener('mouseenter', () => speakText(cleanTitle));
-                tickerSpan.addEventListener('mouseleave', () => stopSpeaking());
-                tickerSpan.addEventListener('click', () => openArticle(item.id));
-                ticker.appendChild(tickerSpan);
-            });
+            newsListEl.innerHTML = '';
+            archiveListEl.innerHTML = '';
+            tickerTrack.innerHTML = '';
 
             if (activeNewsList.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted); font-weight:700;">جميع الأخبار الحالية منقولة للأرشيف.</div>';
+                newsListEl.innerHTML = '<div style="text-align:center; padding: 30px; color: var(--text-muted); width:100%;">لا توجد أخبار حديثة حالياً.</div>';
             } else {
                 activeNewsList.forEach(item => {
-                    list.appendChild(createCardElement(item, false));
+                    newsListEl.appendChild(createCardElement(item, false));
                 });
             }
 
             if (archivedNewsList.length === 0) {
-                archiveList.innerHTML = '<div style="text-align:center; grid-column: 1/-1; padding: 40px; color: var(--text-muted); font-weight:700;">لا توجد أخبار مؤرشفة حالياً.</div>';
+                archiveListEl.innerHTML = '<div style="text-align:center; padding: 30px; color: var(--text-muted); grid-column: 1/-1;">لا توجد أخبار في الأرشيف.</div>';
             } else {
                 archivedNewsList.forEach(item => {
-                    archiveList.appendChild(createCardElement(item, true));
+                    archiveListEl.appendChild(createCardElement(item, true));
                 });
             }
+
+            const tickerSource = cachedNews.length > 0 ? cachedNews : activeNewsList;
+            if (tickerSource.length > 0) {
+                let tickerHtml = '';
+                tickerSource.forEach(item => {
+                    tickerHtml += `<span class="ticker-item" onclick='openArticle(${JSON.stringify(item)})'>${sanitizeText(item.title)}</span>`;
+                });
+                tickerTrack.innerHTML = tickerHtml;
+            } else {
+                tickerTrack.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
+            }
+
+            renderEventsArchive();
         }
 
         function scrollNewsList(direction) {
-            const wrapper = document.getElementById('slider-wrapper');
-            const scrollAmount = 345;
-            
+            const slider = document.getElementById('slider-wrapper');
+            const scrollAmount = 350;
             if (direction === 'next') {
-                wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
             } else {
-                wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
             }
         }
 
-        function showHome() {
+        function openArticle(item) {
+            stopSpeaking();
+            previousView = document.getElementById('archive-view').style.display !== 'none' ? 'archive' : 'home';
+
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'none';
+            const articleView = document.getElementById('article-view');
+            articleView.style.display = 'block';
+
+            document.getElementById('art-title').textContent = item.title;
+            document.getElementById('art-date').textContent = item.date || 'اليوم';
+            
+            const imgEl = document.getElementById('art-img');
+            const resolvedImg = sanitizeURL(item.img);
+            imgEl.src = resolvedImg;
+            imgEl.dataset.fid = getFileId(resolvedImg);
+            imgEl.dataset.step = '0';
+            imgEl.onerror = function() { handleImgError(this); };
+
+            document.getElementById('art-content').textContent = item.content;
+
+            // التحكم في إظهار أو إخفاء زر الرابط المرفق الخاص بالخبر
+            const linkWrap = document.getElementById('art-link-wrap');
+            const linkBtn = document.getElementById('art-external-link');
+            const extUrl = (item.articleLink || item.eventUrl || '').trim();
+
+            if (extUrl && (extUrl.startsWith('http://') || extUrl.startsWith('https://'))) {
+                linkBtn.href = extUrl;
+                linkWrap.style.display = 'flex';
+            } else {
+                linkWrap.style.display = 'none';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            speakText(item.title + '. ' + item.content);
+        }
+
+        function goBackFromArticle() {
             stopSpeaking();
             document.getElementById('article-view').style.display = 'none';
-            document.getElementById('archive-view').style.display = 'none';
-            document.getElementById('home-view').style.display = 'block';
-            previousView = 'home';
+            if (previousView === 'archive') {
+                document.getElementById('archive-view').style.display = 'block';
+            } else {
+                document.getElementById('home-view').style.display = 'block';
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function showArchiveView() {
             stopSpeaking();
-            document.getElementById('article-view').style.display = 'none';
             document.getElementById('home-view').style.display = 'none';
+            document.getElementById('article-view').style.display = 'none';
             document.getElementById('archive-view').style.display = 'block';
-            previousView = 'archive';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function goBackFromArticle() {
-            if (previousView === 'archive') {
-                showArchiveView();
-            } else {
-                showHome();
-            }
-        }
-
-        function openArticle(id) {
+        function showHome() {
             stopSpeaking();
-            const article = cachedNews.find(n => n.id === id);
-            
-            if (article) {
-                const artImg = document.getElementById('art-img');
-                const artSrc = sanitizeURL(article.img);
-                document.getElementById('art-title').textContent = article.title;
-                artImg.dataset.step = '0';
-                artImg.dataset.fid = getFileId(artSrc);
-                artImg.onerror = function () { handleImgError(this); };
-                artImg.src = artSrc;
-                document.getElementById('art-content').textContent = article.content;
-                document.getElementById('art-date').textContent = article.date || 'غير محدد';
-
-                document.getElementById('home-view').style.display = 'none';
-                document.getElementById('archive-view').style.display = 'none';
-                document.getElementById('article-view').style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            document.getElementById('archive-view').style.display = 'none';
+            document.getElementById('article-view').style.display = 'none';
+            document.getElementById('home-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.addEventListener('keydown', function (e) {
-            if (
-                e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
-                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's' || e.key === 'A' || e.key === 'a' || e.key === 'P' || e.key === 'p'))
-            ) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        });
-        document.addEventListener('dragstart', event => event.preventDefault());
-
-        // ✅ حركة تلقائية للبطاقات (بدون نسخ أو تكرار)
-        // تتحرك حتى آخر بطاقة، تتوقف قليلاً، ثم ترجع لأول بطاقة. وتتوقف عند وضع الماوس.
-        (function autoMoveCards() {
-            const wrapper = document.getElementById('slider-wrapper');
-            const SPEED = 40;        // بكسل في الثانية
-            const END_PAUSE = 2500;  // مدة التوقف عند آخر بطاقة (بالمللي ثانية)
-            let paused = false, pos = null, last = null, resumeTimer = null;
-            let atEnd = false, waitUntil = 0;
-
-            wrapper.style.scrollSnapType = 'none';
-            wrapper.style.scrollBehavior = 'auto';
-
-            wrapper.addEventListener('mouseover', e => { if (e.target.closest('.horizontal-card')) paused = true; });
-            wrapper.addEventListener('mouseout', e => {
-                if (e.target.closest('.horizontal-card') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.horizontal-card'))) paused = false;
-            });
-            wrapper.addEventListener('touchstart', () => { paused = true; clearTimeout(resumeTimer); }, { passive: true });
-            wrapper.addEventListener('touchend', () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(() => { paused = false; }, 2000); }, { passive: true });
-
-            function step(t) {
-                if (last === null) last = t;
-                const dt = Math.min((t - last) / 1000, 0.1);
-                last = t;
-
-                const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
-                const homeVisible = document.getElementById('home-view').style.display !== 'none';
-
-                if (!paused && homeVisible && maxScroll > 5) {
-                    if (atEnd) {
-                        // بعد انتهاء التوقف نرجع لأول بطاقة
-                        if (t >= waitUntil) {
-                            atEnd = false;
-                            pos = 0;
-                            wrapper.scrollLeft = 0;
-                        }
-                    } else {
-                        if (pos === null || Math.abs(pos - wrapper.scrollLeft) > 3) pos = wrapper.scrollLeft;
-                        pos -= SPEED * dt; // في الصفحات RTL: النقصان = الانتقال للبطاقات التالية
-                        if (pos <= -maxScroll) {
-                            pos = -maxScroll;
-                            atEnd = true;
-                            waitUntil = t + END_PAUSE;
-                        }
-                        wrapper.scrollLeft = pos;
-                    }
-                } else {
-                    pos = null;
-                }
-                requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-        })();
-
-        fetchNewsFromGoogleSheet();
-
-        setInterval(() => {
-            fetchNewsFromGoogleSheet(true);
-        }, REFRESH_INTERVAL);
-
-        window.addEventListener('focus', () => {
-            fetchNewsFromGoogleSheet(true);
-        });
+        window.onload = function() {
+            fetchNewsFromGoogleSheet();
+            setInterval(() => {
+                fetchNewsFromGoogleSheet(true);
+            }, REFRESH_INTERVAL);
+        };
     </script>
 </body>
 </html>
