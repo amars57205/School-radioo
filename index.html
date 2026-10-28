@@ -795,7 +795,6 @@
             return (now - parsedDate) > threeDaysInMs;
         }
 
-        // ✅ دالة ذكية جداً للبحث عن العمود بالاسم أو بأي جزء منه
         function pick(item, keywords) {
             for (const k of Object.keys(item)) {
                 const lower = k.toLowerCase().trim();
@@ -832,7 +831,6 @@
                     let img = String(item.img || pick(item, ['صورة', 'img', 'image']) || '').trim();
                     let date = item.date || pick(item, ['تاريخ', 'طابع', 'timestamp', 'date']) || 'اليوم';
                     
-                    // ✅ التقاط الرابط من أي عمود يحتوي على (رابط، link، url، إضافي)
                     let articleLink = String(
                         item.articleLink ||
                         item.link ||
@@ -846,9 +844,6 @@
                         pick(item, ['حدث اليوم', 'الحدث', 'event']) ||
                         ''
                     ).trim();
-
-                    // طباعة فحص في وحدة التحكم لترى المفاتيح المجلوبة (اضغط F12 في المتصفح لرؤيتها)
-                    console.log('Row Data:', { title, articleLink });
 
                     if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
                         if (!seenEvents.has(eventUrl)) {
