@@ -795,9 +795,10 @@
             return (now - parsedDate) > threeDaysInMs;
         }
 
+        // ✅ دالة ذكية جداً للبحث عن العمود بالاسم أو بأي جزء منه
         function pick(item, keywords) {
             for (const k of Object.keys(item)) {
-                const lower = k.toLowerCase();
+                const lower = k.toLowerCase().trim();
                 if (keywords.some(w => lower.includes(w))) {
                     const v = item[k];
                     if (v !== undefined && v !== null && String(v).trim() !== '') return v;
@@ -831,29 +832,23 @@
                     let img = String(item.img || pick(item, ['صورة', 'img', 'image']) || '').trim();
                     let date = item.date || pick(item, ['تاريخ', 'طابع', 'timestamp', 'date']) || 'اليوم';
                     
-                    // استخراج الرابط المرفق الخاص بالخبر (مثل رابط صفحة أخرى، ملف PDF، نموذج، الخ)
+                    // ✅ التقاط الرابط من أي عمود يحتوي على (رابط، link، url، إضافي)
                     let articleLink = String(
                         item.articleLink ||
                         item.link ||
                         item.url ||
-                        item['رابط إضافي'] ||
-                        item['الرابط المرفق'] ||
-                        item['رابط الخبر'] ||
-                        item['رابط'] ||
-                        pick(item, ['رابط إضافي', 'رابط مرفق', 'رابط الخبر', 'link', 'url']) ||
+                        pick(item, ['رابط', 'link', 'url', 'إضافي']) ||
                         ''
                     ).trim();
 
-                    // استخراج رابط الحدث اليومي المميز
                     let eventUrl = String(
                         item.eventUrl ||
-                        item['رابط الحدث اليومي المميز'] || 
-                        item['رابط الحدث اليومي'] || 
-                        item['رابط الحدث'] || 
-                        item.event_url || 
-                        pick(item, ['حدث', 'event']) ||
+                        pick(item, ['حدث اليوم', 'الحدث', 'event']) ||
                         ''
                     ).trim();
+
+                    // طباعة فحص في وحدة التحكم لترى المفاتيح المجلوبة (اضغط F12 في المتصفح لرؤيتها)
+                    console.log('Row Data:', { title, articleLink });
 
                     if (eventUrl && (eventUrl.startsWith('http://') || eventUrl.startsWith('https://'))) {
                         if (!seenEvents.has(eventUrl)) {
@@ -1044,10 +1039,10 @@
 
             document.getElementById('art-content').textContent = item.content;
 
-            // التحكم في إظهار أو إخفاء زر الرابط المرفق الخاص بالخبر
+            // إظهار أو إخفاء زر الرابط المرفق الخاص بالخبر
             const linkWrap = document.getElementById('art-link-wrap');
             const linkBtn = document.getElementById('art-external-link');
-            const extUrl = (item.articleLink || item.eventUrl || '').trim();
+            const extUrl = (item.articleLink || '').trim();
 
             if (extUrl && (extUrl.startsWith('http://') || extUrl.startsWith('https://'))) {
                 linkBtn.href = extUrl;
