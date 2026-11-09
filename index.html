@@ -144,6 +144,55 @@
             to { transform: scale(1.25); }
         }
 
+        /* الداش بورد المصغر الاحترافي */
+        .mini-dashboard {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 18px auto 5px auto;
+            max-width: 600px;
+            padding: 0 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 8px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-card i {
+            font-size: 1.2rem;
+            color: var(--school-gold);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 900;
+            font-family: 'Changa', sans-serif;
+            line-height: 1.1;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #E2E8F0;
+            font-weight: 600;
+        }
+
         .ticker-wrapper {
             background: var(--card-bg);
             border-bottom: 1px solid #E2E8F0;
@@ -177,7 +226,8 @@
         .ticker-track {
             white-space: nowrap;
             display: inline-block;
-            animation: ticker 35s linear infinite;
+            /* تم عكس اتجاه الحركة لتصبح من اليسار إلى اليمين */
+            animation: tickerReverse 35s linear infinite;
         }
 
         .ticker-track:hover {
@@ -186,7 +236,7 @@
 
         .ticker-item {
             display: inline-block;
-            margin-left: 40px;
+            margin-right: 40px; /* تم تعديل المسافة بما يتناسب مع اتجاه الحركة الجديد من اليسار لليمين */
             font-size: 0.95rem;
             font-weight: 600;
             color: var(--school-navy);
@@ -203,12 +253,13 @@
 
         .ticker-item::after {
             content: "🎓";
-            margin-right: 40px;
+            margin-left: 40px; /* فاصل بين العناصر */
         }
 
-        @keyframes ticker {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+        /* تعديل اتجاه حركة الشريط المتحرك من اليسار إلى اليمين */
+        @keyframes tickerReverse {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .main-container {
@@ -530,7 +581,6 @@
             white-space: pre-line;
         }
 
-        /* زر الرابط المرفق التفاعلي داخل الخبر */
         .article-link-container {
             margin-top: 30px;
             padding-top: 20px;
@@ -609,6 +659,24 @@
                 <i class="fa-solid fa-code"></i> إعداد وبرمجة أ.صلاح الرحيمان
             </div>
             
+            <!-- لوحة التحكم المصغرة لإحصائيات المنشور والأرشيف -->
+            <div class="mini-dashboard">
+                <div class="stat-card">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-active-count">0</span>
+                        <span class="stat-label">الأخبار المنشورة</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-archive-count">0</span>
+                        <span class="stat-label">الأخبار المؤرشفة</span>
+                    </div>
+                </div>
+            </div>
+
             <a href="https://sites.google.com/view/ammar-newsscience-dayoctober?usp=sharing" id="daily-event-link" target="_blank" class="daily-event-btn">
                 <i class="fa-solid fa-heart-pulse"></i> الحدث اليومي المميز
             </a>
@@ -702,7 +770,6 @@
     </footer>
 
     <script>
-        // ✅ رابط Apps Script الجديد الخاص بك
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxg7Bwwups2xito2D_OgPnAfVbDtik1SFsNkWcAXQFcrQ_lg7M62Bc59_Bevu3XqSjAVg/exec';
         const DEFAULT_FALLBACK_IMAGE = 'https://lh3.googleusercontent.com/d/1bmKdhHq0TwB3ek0Xiz2NpdBB-87t-Qdv';
         const REFRESH_INTERVAL = 30000;
@@ -887,6 +954,10 @@
                         }
                     });
 
+                    // تحديث أعداد الداش بورد المصغر تلقائياً
+                    document.getElementById('stat-active-count').textContent = activeNewsList.length;
+                    document.getElementById('stat-archive-count').textContent = archivedNewsList.length;
+
                     updateDailyEventButton();
                     renderInterface();
                 }
@@ -935,32 +1006,30 @@
 
         function createCardElement(item, isArchived = false) {
             const cleanTitle = sanitizeText(item.title);
-            const cleanImg = sanitizeURL(item.img);
-            const cleanContent = sanitizeText(item.content);
-            const cleanDate = sanitizeText(item.date || 'اليوم');
-            const excerpt = cleanContent.length > 90 ? cleanContent.substring(0, 90) + '...' : cleanContent;
+            const cleanExcerpt = sanitizeText(item.content.substring(0, 100)) + '...';
+            const imgUrl = sanitizeURL(item.img);
+            const fileId = getFileId(imgUrl);
 
             const card = document.createElement('div');
             card.className = 'horizontal-card';
+            card.onclick = () => openArticle(item);
 
             card.innerHTML = `
                 <div class="card-img-wrap">
-                    <span class="card-category ${isArchived ? 'archived' : ''}">${isArchived ? 'أرشيف' : 'نشاط مدرسي'}</span>
-                    <img src="${cleanImg}" data-fid="${getFileId(cleanImg)}" alt="${cleanTitle}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="handleImgError(this)">
+                    <img src="${imgUrl}" data-fid="${fileId}" alt="صورة الخبر" onerror="handleImgError(this)" loading="lazy" referrerpolicy="no-referrer">
+                    <span class="card-category ${isArchived ? 'archived' : ''}">${isArchived ? 'أرشيف الأخبار' : 'إذاعة نبض'}</span>
                 </div>
                 <div class="card-content">
                     <div>
                         <h3 class="card-title">${cleanTitle}</h3>
-                        <p class="card-excerpt">${excerpt}</p>
+                        <p class="card-excerpt">${cleanExcerpt}</p>
                     </div>
                     <div class="card-footer">
-                        <span><i class="fa-regular fa-calendar-days"></i> ${cleanDate}</span>
-                        <span class="read-more-btn">التفاصيل <i class="fa-solid fa-arrow-left"></i></span>
+                        <span><i class="fa-regular fa-calendar"></i> ${sanitizeText(item.date)}</span>
+                        <span class="read-more-btn">قراءة المزيد <i class="fa-solid fa-arrow-left"></i></span>
                     </div>
                 </div>
             `;
-
-            card.onclick = () => openArticle(item);
             return card;
         }
 
@@ -973,8 +1042,20 @@
             archiveListEl.innerHTML = '';
             tickerTrack.innerHTML = '';
 
+            if (cachedNews.length === 0) {
+                tickerTrack.innerHTML = '<span class="ticker-item">مرحباً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
+            } else {
+                cachedNews.forEach(item => {
+                    const tItem = document.createElement('span');
+                    tItem.className = 'ticker-item';
+                    tItem.textContent = item.title;
+                    tItem.onclick = () => openArticle(item);
+                    tickerTrack.appendChild(tItem);
+                });
+            }
+
             if (activeNewsList.length === 0) {
-                newsListEl.innerHTML = '<div style="text-align:center; padding: 30px; color: var(--text-muted); width:100%;">لا توجد أخبار حديثة حالياً.</div>';
+                newsListEl.innerHTML = '<div style="padding: 20px; color: var(--text-muted);">لا توجد أخبار حديثة حالياً.</div>';
             } else {
                 activeNewsList.forEach(item => {
                     newsListEl.appendChild(createCardElement(item, false));
@@ -982,22 +1063,11 @@
             }
 
             if (archivedNewsList.length === 0) {
-                archiveListEl.innerHTML = '<div style="text-align:center; padding: 30px; color: var(--text-muted); grid-column: 1/-1;">لا توجد أخبار في الأرشيف.</div>';
+                archiveListEl.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">لا توجد أخبار مؤرشفة حالياً.</div>';
             } else {
                 archivedNewsList.forEach(item => {
                     archiveListEl.appendChild(createCardElement(item, true));
                 });
-            }
-
-            const tickerSource = cachedNews.length > 0 ? cachedNews : activeNewsList;
-            if (tickerSource.length > 0) {
-                let tickerHtml = '';
-                tickerSource.forEach(item => {
-                    tickerHtml += `<span class="ticker-item" onclick='openArticle(${JSON.stringify(item)})'>${sanitizeText(item.title)}</span>`;
-                });
-                tickerTrack.innerHTML = tickerHtml;
-            } else {
-                tickerTrack.innerHTML = '<span class="ticker-item">أهلاً بكم في إذاعة نبض الإخبارية لمدرسة عمار بن ياسر الابتدائية</span>';
             }
 
             renderEventsArchive();
@@ -1013,36 +1083,52 @@
             }
         }
 
+        function showArchiveView() {
+            previousView = 'home';
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('archive-view').style.display = 'block';
+            document.getElementById('article-view').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showHome() {
+            previousView = 'home';
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('archive-view').style.display = 'none';
+            document.getElementById('article-view').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function openArticle(item) {
             stopSpeaking();
-            previousView = document.getElementById('archive-view').style.display !== 'none' ? 'archive' : 'home';
+            if (document.getElementById('home-view').style.display !== 'none') {
+                previousView = 'home';
+            } else {
+                previousView = 'archive';
+            }
 
             document.getElementById('home-view').style.display = 'none';
             document.getElementById('archive-view').style.display = 'none';
-            const articleView = document.getElementById('article-view');
-            articleView.style.display = 'block';
+            document.getElementById('article-view').style.display = 'block';
 
             document.getElementById('art-title').textContent = item.title;
-            document.getElementById('art-date').textContent = item.date || 'اليوم';
+            document.getElementById('art-date').textContent = item.date;
             
             const imgEl = document.getElementById('art-img');
-            const resolvedImg = sanitizeURL(item.img);
-            imgEl.src = resolvedImg;
-            imgEl.dataset.fid = getFileId(resolvedImg);
-            imgEl.dataset.step = '0';
-            imgEl.onerror = function() { handleImgError(this); };
+            const finalImgUrl = sanitizeURL(item.img);
+            imgEl.dataset.fid = getFileId(finalImgUrl);
+            imgEl.src = finalImgUrl;
 
             document.getElementById('art-content').textContent = item.content;
 
-            // إظهار أو إخفاء زر الرابط المرفق الخاص بالخبر
             const linkWrap = document.getElementById('art-link-wrap');
-            const linkBtn = document.getElementById('art-external-link');
-            const extUrl = (item.articleLink || '').trim();
-
-            if (extUrl && (extUrl.startsWith('http://') || extUrl.startsWith('https://'))) {
-                linkBtn.href = extUrl;
+            const extLinkBtn = document.getElementById('art-external-link');
+            
+            if (item.articleLink && item.articleLink.startsWith('http')) {
+                extLinkBtn.href = item.articleLink;
                 linkWrap.style.display = 'flex';
             } else {
+                extLinkBtn.href = '#';
                 linkWrap.style.display = 'none';
             }
 
@@ -1052,33 +1138,15 @@
 
         function goBackFromArticle() {
             stopSpeaking();
-            document.getElementById('article-view').style.display = 'none';
             if (previousView === 'archive') {
-                document.getElementById('archive-view').style.display = 'block';
+                showArchiveView();
             } else {
-                document.getElementById('home-view').style.display = 'block';
+                showHome();
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function showArchiveView() {
-            stopSpeaking();
-            document.getElementById('home-view').style.display = 'none';
-            document.getElementById('article-view').style.display = 'none';
-            document.getElementById('archive-view').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function showHome() {
-            stopSpeaking();
-            document.getElementById('archive-view').style.display = 'none';
-            document.getElementById('article-view').style.display = 'none';
-            document.getElementById('home-view').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         window.onload = function() {
-            fetchNewsFromGoogleSheet();
+            fetchNewsFromGoogleSheet(false);
             setInterval(() => {
                 fetchNewsFromGoogleSheet(true);
             }, REFRESH_INTERVAL);
